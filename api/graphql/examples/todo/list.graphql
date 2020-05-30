@@ -1,0 +1,7 @@
+{
+    todoItems {
+        id
+        title
+        completed
+    }
+}

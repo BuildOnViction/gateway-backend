@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package auth.v1beta1;
+
+option go_package = "gateway";
+
+message RequestTokenRequest {
+  string address = 1;
+}
+
+message RequestTokenResponse { string token = 1; }
+
+message AuthServiceLoginRequest {
+  string address = 1;
+}
+
+message AuthServiceLoginResponse { bool success = 1; }
+
+service AuthService {
+  rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {};
+
+  rpc Login(AuthServiceLoginRequest) returns (AuthServiceLoginResponse) {};
+}
