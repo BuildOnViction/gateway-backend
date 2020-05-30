@@ -5,7 +5,7 @@ import (
 
 	"logur.dev/logur"
 
-	"gateway/internal/common"
+	"github.com/anhntbk08/gateway/internal/common"
 )
 
 // Logger wraps a logur logger and exposes it under a custom interface.

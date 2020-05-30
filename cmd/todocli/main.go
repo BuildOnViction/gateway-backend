@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gateway/internal/app/todocli"
+	"github.com/anhntbk08/gateway/internal/app/todocli"
 )
 
 func main() {

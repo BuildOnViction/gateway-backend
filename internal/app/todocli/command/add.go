@@ -9,7 +9,7 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/status"
 
-	todov1beta1 "gateway/.gen/api/proto/todo/v1beta1"
+	todov1beta1 "github.com/anhntbk08/gateway/.gen/api/proto/todo/v1beta1"
 )
 
 type createOptions struct {

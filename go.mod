@@ -1,4 +1,4 @@
-module gateway
+module github.com/anhntbk08/gateway
 
 go 1.13.5
 
@@ -13,6 +13,7 @@ require (
 	github.com/AppsFlyer/go-sundheit v0.2.0
 	github.com/ThreeDotsLabs/watermill v1.1.1
 	github.com/cloudflare/tableflip v1.2.0
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/facebookincubator/ent v0.2.1
 	github.com/go-bdd/gobdd v1.0.1
 	github.com/go-kit/kit v0.10.0
@@ -35,7 +36,9 @@ require (
 	github.com/spf13/viper v1.7.0
 	github.com/stretchr/testify v1.5.1
 	github.com/vektah/gqlparser/v2 v2.0.1
+	gitlab.com/techschool/pcbook v0.0.0-20200510132003-f115a898cee9
 	go.opencensus.io v0.22.3
+	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
 	google.golang.org/genproto v0.0.0-20200507105951-43844f6eee31
 	google.golang.org/grpc v1.29.1
 	google.golang.org/protobuf v1.22.0

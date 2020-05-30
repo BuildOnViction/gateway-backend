@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
-	"gateway/internal/platform/database"
-	"gateway/internal/platform/log"
-	"gateway/internal/platform/opencensus"
+	"github.com/anhntbk08/gateway/internal/platform/database"
+	"github.com/anhntbk08/gateway/internal/platform/log"
+	"github.com/anhntbk08/gateway/internal/platform/opencensus"
 )
 
 // configuration holds any kind of configuration that comes from the outside world and

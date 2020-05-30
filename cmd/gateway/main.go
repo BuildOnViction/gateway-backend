@@ -21,6 +21,14 @@ import (
 	health "github.com/AppsFlyer/go-sundheit"
 	"github.com/AppsFlyer/go-sundheit/checks"
 	healthhttp "github.com/AppsFlyer/go-sundheit/http"
+	gateway "github.com/anhntbk08/gateway/internal/app/gateway"
+	"github.com/anhntbk08/gateway/internal/app/gateway/todo/tododriver"
+	"github.com/anhntbk08/gateway/internal/common/commonadapter"
+	"github.com/anhntbk08/gateway/internal/platform/appkit"
+	"github.com/anhntbk08/gateway/internal/platform/database"
+	"github.com/anhntbk08/gateway/internal/platform/gosundheit"
+	"github.com/anhntbk08/gateway/internal/platform/log"
+	"github.com/anhntbk08/gateway/internal/platform/watermill"
 	"github.com/cloudflare/tableflip"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -38,15 +46,6 @@ import (
 	"go.opencensus.io/zpages"
 	"google.golang.org/grpc"
 	"logur.dev/logur"
-
-	"github.com/anhntbk08/gateway/internal/app/gateway"
-	"github.com/anhntbk08/gateway/internal/app/gateway/todo/tododriver"
-	"github.com/anhntbk08/gateway/internal/common/commonadapter"
-	"github.com/anhntbk08/gateway/internal/platform/appkit"
-	"github.com/anhntbk08/gateway/internal/platform/database"
-	"github.com/anhntbk08/gateway/internal/platform/gosundheit"
-	"github.com/anhntbk08/gateway/internal/platform/log"
-	"github.com/anhntbk08/gateway/internal/platform/watermill"
 )
 
 // Provisioned by ldflags
@@ -62,10 +61,10 @@ const (
 	//
 	// It identifies the application itself, the actual instance needs to be identified via environment
 	// and other details.
-	appName = "gateway"
+	appName = "github.com/anhntbk08/gateway"
 
 	// friendlyAppName is the visible name of the application.
-	friendlyAppName = "Gateway"
+	friendlyAppName = "github.com/anhntbk08/gateway"
 )
 
 func main() {
@@ -111,12 +110,12 @@ func main() {
 		logger.Warn("configuration file not found")
 	}
 
-	err = config.Validate()
-	if err != nil {
-		logger.Error(err.Error())
+	// err = config.Validate()
+	// if err != nil {
+	// 	logger.Error(err.Error())
 
-		os.Exit(3)
-	}
+	// 	os.Exit(3)
+	// }
 
 	// Configure error handler
 	errorHandler := logurhandler.New(logger)

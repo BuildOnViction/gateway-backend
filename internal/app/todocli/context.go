@@ -1,7 +1,7 @@
 package todocli
 
 import (
-	todov1beta1 "gateway/.gen/api/proto/todo/v1beta1"
+	todov1beta1 "github.com/anhntbk08/gateway/.gen/api/proto/todo/v1beta1"
 )
 
 type context struct {
