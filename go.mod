@@ -38,11 +38,12 @@ require (
 	github.com/vektah/gqlparser/v2 v2.0.1
 	gitlab.com/techschool/pcbook v0.0.0-20200510132003-f115a898cee9
 	go.opencensus.io v0.22.3
-	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
+	golang.org/x/crypto v0.0.0-20191112222119-e1110fd1c708
 	google.golang.org/genproto v0.0.0-20200507105951-43844f6eee31
 	google.golang.org/grpc v1.29.1
 	google.golang.org/protobuf v1.22.0
 	logur.dev/adapter/logrus v0.5.0
 	logur.dev/integration/watermill v0.5.0
 	logur.dev/logur v0.16.2
+	sagikazarmark.dev/mga v0.2.0 // indirect
 )

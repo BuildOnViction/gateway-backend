@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	auth "github.com/anhntbk08/gateway/.gen/api/proto/auth/v1beta1"
+	bridge "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -20,7 +20,7 @@ func NewAuthServer(userStore UserStore, jwtManager *JWTManager) *AuthServer {
 }
 
 // Login is a unary RPC to login user
-func (server *AuthServer) Login(ctx context.Context, req *auth.AuthServiceLoginRequest) (*auth.AuthServiceLoginResponse, error) {
+func (server *AuthServer) Login(ctx context.Context, req *bridge.AuthServiceLoginRequest) (*bridge.AuthServiceLoginResponse, error) {
 	user, err := server.userStore.Find(req.GetUsername())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "cannot find user: %v", err)
@@ -35,6 +35,6 @@ func (server *AuthServer) Login(ctx context.Context, req *auth.AuthServiceLoginR
 		return nil, status.Errorf(codes.Internal, "cannot generate access token")
 	}
 
-	res := &auth.AuthServiceLoginResponse{AccessToken: token}
+	res := &bridge.AuthServiceLoginResponse{AccessToken: token}
 	return res, nil
 }

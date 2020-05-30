@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/ThreeDotsLabs/watermill/components/cqrs"
 	"github.com/ThreeDotsLabs/watermill/message"
 	entsql "github.com/facebookincubator/ent/dialect/sql"
 	"github.com/go-kit/kit/endpoint"
@@ -22,20 +21,26 @@ import (
 	kitxgrpc "github.com/sagikazarmark/kitx/transport/grpc"
 	kitxhttp "github.com/sagikazarmark/kitx/transport/http"
 	"google.golang.org/grpc"
-	watermilllog "logur.dev/integration/watermill"
 
-	todov1beta1 "github.com/anhntbk08/gateway/.gen/api/proto/todo/v1beta1"
 	"github.com/anhntbk08/gateway/internal/app/gateway/httpbin"
 	"github.com/anhntbk08/gateway/internal/app/gateway/landing/landingdriver"
 	"github.com/anhntbk08/gateway/internal/app/gateway/todo"
 	"github.com/anhntbk08/gateway/internal/app/gateway/todo/todoadapter"
 	"github.com/anhntbk08/gateway/internal/app/gateway/todo/todoadapter/ent"
 	"github.com/anhntbk08/gateway/internal/app/gateway/todo/todoadapter/ent/migrate"
-	"github.com/anhntbk08/gateway/internal/app/gateway/todo/tododriver"
-	"github.com/anhntbk08/gateway/internal/app/gateway/todo/todogen"
-)
 
-const todoTopic = "todo"
+	// "github.com/anhntbk08/gateway/internal/app/gateway/bridge/adapter"
+	// "github.com/anhntbk08/gateway/internal/app/gateway/bridge/adapter/ent"
+	// "github.com/anhntbk08/gateway/internal/app/gateway/bridge/adapter/ent/migrate"
+	bridgedriver "github.com/anhntbk08/gateway/internal/app/gateway/bridge/driver"
+	// todov1beta1 "github.com/anhntbk08/gateway/.gen/api/proto/todo/v1beta1"
+	// "github.com/anhntbk08/gateway/internal/app/gateway/todo"
+	// "github.com/anhntbk08/gateway/internal/app/gateway/todo/todoadapter"
+	// "github.com/anhntbk08/gateway/internal/app/gateway/todo/todoadapter/ent"
+	// "github.com/anhntbk08/gateway/internal/app/gateway/todo/todoadapter/ent/migrate"
+	// "github.com/anhntbk08/gateway/internal/app/gateway/todo/tododriver"
+	// "github.com/anhntbk08/gateway/internal/app/gateway/todo/todogen"
+)
 
 // InitializeApp initializes a new HTTP and a new gRPC application.
 func InitializeApp(
@@ -71,11 +76,11 @@ func InitializeApp(
 	}
 
 	{
-		eventBus, _ := cqrs.NewEventBus(
-			publisher,
-			func(eventName string) string { return todoTopic },
-			cqrs.JSONMarshaler{GenerateName: cqrs.StructName},
-		)
+		// eventBus, _ := cqrs.NewEventBus(
+		// 	publisher,
+		// 	func(eventName string) string { return todoTopic },
+		// 	cqrs.JSONMarshaler{GenerateName: cqrs.StructName},
+		// )
 
 		var store todo.Store = todo.NewInMemoryStore()
 		if storage == "database" {
@@ -97,29 +102,28 @@ func InitializeApp(
 			store,
 			todogen.NewEventDispatcher(eventBus),
 		)
-		service = tododriver.LoggingMiddleware(logger)(service)
-		service = tododriver.InstrumentationMiddleware()(service)
+		service = bridgedriver.LoggingMiddleware(logger)(service)
+		service = bridgedriver.InstrumentationMiddleware()(service)
 
-		endpoints := tododriver.MakeEndpoints(
+		endpoints := bridgedriver.MakeEndpoints(
 			service,
 			kitxendpoint.Combine(endpointMiddleware...),
 		)
 
-		tododriver.RegisterHTTPHandlers(
+		bridgedriver.RegisterHTTPHandlers(
 			endpoints,
-			httpRouter.PathPrefix("/todos").Subrouter(),
+			httpRouter.PathPrefix("/bridge").Subrouter(),
 			kitxhttp.ServerOptions(httpServerOptions),
 		)
 
 		todov1beta1.RegisterTodoListServer(
 			grpcServer,
-			tododriver.MakeGRPCServer(
+			bridgedriver.MakeGRPCServer(
 				endpoints,
 				kitxgrpc.ServerOptions(grpcServerOptions),
 			),
 		)
 
-		httpRouter.PathPrefix("/graphql").Handler(tododriver.MakeGraphQLHandler(endpoints, errorHandler))
 	}
 
 	landingdriver.RegisterHTTPHandlers(httpRouter)
@@ -129,22 +133,22 @@ func InitializeApp(
 	))
 }
 
-// RegisterEventHandlers registers event handlers in a message router.
-func RegisterEventHandlers(router *message.Router, subscriber message.Subscriber, logger Logger) error {
-	todoEventProcessor, _ := cqrs.NewEventProcessor(
-		[]cqrs.EventHandler{
-			todogen.NewMarkedAsCompleteEventHandler(todo.NewLogEventHandler(logger), "marked_as_complete"),
-		},
-		func(eventName string) string { return todoTopic },
-		func(handlerName string) (message.Subscriber, error) { return subscriber, nil },
-		cqrs.JSONMarshaler{GenerateName: cqrs.StructName},
-		watermilllog.New(logger.WithFields(map[string]interface{}{"component": "watermill"})),
-	)
+// // RegisterEventHandlers registers event handlers in a message router.
+// func RegisterEventHandlers(router *message.Router, subscriber message.Subscriber, logger Logger) error {
+// 	todoEventProcessor, _ := cqrs.NewEventProcessor(
+// 		[]cqrs.EventHandler{
+// 			todogen.NewMarkedAsCompleteEventHandler(todo.NewLogEventHandler(logger), "marked_as_complete"),
+// 		},
+// 		func(eventName string) string { return todoTopic },
+// 		func(handlerName string) (message.Subscriber, error) { return subscriber, nil },
+// 		cqrs.JSONMarshaler{GenerateName: cqrs.StructName},
+// 		watermilllog.New(logger.WithFields(map[string]interface{}{"component": "watermill"})),
+// 	)
 
-	err := todoEventProcessor.AddHandlersToRouter(router)
-	if err != nil {
-		return err
-	}
+// 	err := todoEventProcessor.AddHandlersToRouter(router)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }

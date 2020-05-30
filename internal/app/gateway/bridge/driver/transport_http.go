@@ -1,0 +1,77 @@
+package driver
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+
+	"emperror.dev/errors"
+	kithttp "github.com/go-kit/kit/transport/http"
+	"github.com/gorilla/mux"
+	appkithttp "github.com/sagikazarmark/appkit/transport/http"
+	kitxhttp "github.com/sagikazarmark/kitx/transport/http"
+
+	api "github.com/anhntbk08/gateway/.gen/api/openapi/todo/go"
+	"github.com/anhntbk08/gateway/internal/app/gateway/todo"
+)
+
+// RegisterHTTPHandlers mounts all of the service endpoints into a router.
+func RegisterHTTPHandlers(endpoints Endpoints, router *mux.Router, options ...kithttp.ServerOption) {
+	errorEncoder := kitxhttp.NewJSONProblemErrorResponseEncoder(appkithttp.NewDefaultProblemConverter())
+
+	router.Methods(http.MethodPost).Path("").Handler(kithttp.NewServer(
+		endpoints.AddItem,
+		decodeAddItemHTTPRequest,
+		kitxhttp.ErrorResponseEncoder(encodeAddItemHTTPResponse, errorEncoder),
+		options...,
+	))
+
+}
+
+func decodeAddItemHTTPRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var apiRequest api.AddItemRequest
+
+	err := json.NewDecoder(r.Body).Decode(&apiRequest)
+	if err != nil {
+		return nil, errors.Wrap(err, "decode request")
+	}
+
+	return AddItemRequest{
+		NewItem: todo.NewItem{
+			Title: apiRequest.Title,
+			Order: int(apiRequest.Order),
+		},
+	}, nil
+}
+
+func encodeAddItemHTTPResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
+	resp := response.(AddItemResponse)
+
+	apiResponse := marshalItemHTTP(ctx, resp.Item)
+
+	return kitxhttp.JSONResponseEncoder(ctx, w, kitxhttp.WithStatusCode(apiResponse, http.StatusCreated))
+}
+
+func marshalItemHTTP(ctx context.Context, item todo.Item) api.Item {
+	host, _ := ctx.Value(kithttp.ContextKeyRequestHost).(string)
+
+	return api.Item{
+		Id:        item.ID,
+		Title:     item.Title,
+		Completed: item.Completed,
+		Order:     int32(item.Order),
+		Url:       fmt.Sprintf("http://%s/todos/%s", host, item.ID),
+	}
+}
+
+func getIDParamFromRequest(r *http.Request) (string, error) {
+	vars := mux.Vars(r)
+
+	id, ok := vars["id"]
+	if !ok || id == "" {
+		return "", errors.NewWithDetails("missing parameter from the URL", "param", "id")
+	}
+
+	return id, nil
+}
