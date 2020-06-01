@@ -6,33 +6,30 @@ import (
 	"net/http"
 
 	"github.com/ThreeDotsLabs/watermill/message"
-	entsql "github.com/facebookincubator/ent/dialect/sql"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/tracing/opencensus"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
-	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/goph/idgen/ulidgen"
 	"github.com/gorilla/mux"
 	appkitendpoint "github.com/sagikazarmark/appkit/endpoint"
-	appkithttp "github.com/sagikazarmark/appkit/transport/http"
 	"github.com/sagikazarmark/kitx/correlation"
 	kitxendpoint "github.com/sagikazarmark/kitx/endpoint"
 	kitxtransport "github.com/sagikazarmark/kitx/transport"
 	kitxgrpc "github.com/sagikazarmark/kitx/transport/grpc"
-	kitxhttp "github.com/sagikazarmark/kitx/transport/http"
+
 	"google.golang.org/grpc"
 
 	"github.com/anhntbk08/gateway/internal/app/gateway/httpbin"
 	"github.com/anhntbk08/gateway/internal/app/gateway/landing/landingdriver"
-	"github.com/anhntbk08/gateway/internal/app/gateway/todo"
-	"github.com/anhntbk08/gateway/internal/app/gateway/todo/todoadapter"
-	"github.com/anhntbk08/gateway/internal/app/gateway/todo/todoadapter/ent"
-	"github.com/anhntbk08/gateway/internal/app/gateway/todo/todoadapter/ent/migrate"
 
 	// "github.com/anhntbk08/gateway/internal/app/gateway/bridge/adapter"
 	// "github.com/anhntbk08/gateway/internal/app/gateway/bridge/adapter/ent"
 	// "github.com/anhntbk08/gateway/internal/app/gateway/bridge/adapter/ent/migrate"
-	bridgedriver "github.com/anhntbk08/gateway/internal/app/gateway/bridge/driver"
+
+	// TODO find way to merge all small services part into 1 sub-service with driver, store adaptor ...
+	authv1 "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
+	bridgeAuth "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/auth"
+	bridgeAuthDriver "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/auth/authdriver"
 	// todov1beta1 "github.com/anhntbk08/gateway/.gen/api/proto/todo/v1beta1"
 	// "github.com/anhntbk08/gateway/internal/app/gateway/todo"
 	// "github.com/anhntbk08/gateway/internal/app/gateway/todo/todoadapter"
@@ -64,11 +61,11 @@ func InitializeApp(
 
 	transportErrorHandler := kitxtransport.NewErrorHandler(errorHandler)
 
-	httpServerOptions := []kithttp.ServerOption{
-		kithttp.ServerErrorHandler(transportErrorHandler),
-		kithttp.ServerErrorEncoder(kitxhttp.NewJSONProblemErrorEncoder(appkithttp.NewDefaultProblemConverter())),
-		kithttp.ServerBefore(correlation.HTTPToContext(), kithttp.PopulateRequestContext),
-	}
+	// httpServerOptions := []kithttp.ServerOption{
+	// 	kithttp.ServerErrorHandler(transportErrorHandler),
+	// 	kithttp.ServerErrorEncoder(kitxhttp.NewJSONProblemErrorEncoder(appkithttp.NewDefaultProblemConverter())),
+	// 	kithttp.ServerBefore(correlation.HTTPToContext(), kithttp.PopulateRequestContext),
+	// }
 
 	grpcServerOptions := []kitgrpc.ServerOption{
 		kitgrpc.ServerErrorHandler(transportErrorHandler),
@@ -82,47 +79,52 @@ func InitializeApp(
 		// 	cqrs.JSONMarshaler{GenerateName: cqrs.StructName},
 		// )
 
-		var store todo.Store = todo.NewInMemoryStore()
-		if storage == "database" {
-			client := ent.NewClient(ent.Driver(entsql.OpenDB("mysql", db)))
-			err := client.Schema.Create(
-				context.Background(),
-				migrate.WithDropIndex(true),
-				migrate.WithDropColumn(true),
-			)
-			if err != nil {
-				panic(err)
-			}
+		// var store todo.Store = todo.NewInMemoryStore()
+		// if storage == "database" {
+		// 	client := ent.NewClient(ent.Driver(entsql.OpenDB("mysql", db)))
+		// 	err := client.Schema.Create(
+		// 		context.Background(),
+		// 		migrate.WithDropIndex(true),
+		// 		migrate.WithDropColumn(true),
+		// 	)
+		// 	if err != nil {
+		// 		panic(err)
+		// 	}
 
-			store = todoadapter.NewEntStore(client)
-		}
+		// 	store = todoadapter.NewEntStore(client)
+		// }
 
-		service := todo.NewService(
+		service := bridgeAuth.NewService(
 			ulidgen.NewGenerator(),
-			store,
-			todogen.NewEventDispatcher(eventBus),
 		)
-		service = bridgedriver.LoggingMiddleware(logger)(service)
-		service = bridgedriver.InstrumentationMiddleware()(service)
+		service = bridgeAuthDriver.LoggingMiddleware(logger)(service)
+		service = bridgeAuthDriver.InstrumentationMiddleware()(service)
 
-		endpoints := bridgedriver.MakeEndpoints(
+		endpoints := bridgeAuthDriver.MakeEndpoints(
 			service,
 			kitxendpoint.Combine(endpointMiddleware...),
 		)
 
-		bridgedriver.RegisterHTTPHandlers(
-			endpoints,
-			httpRouter.PathPrefix("/bridge").Subrouter(),
-			kitxhttp.ServerOptions(httpServerOptions),
-		)
+		// bridgeAuthDriver.RegisterHTTPHandlers(
+		// 	endpoints,
+		// 	httpRouter.PathPrefix("/bridge").Subrouter(),
+		// 	kitxhttp.ServerOptions(httpServerOptions),
+		// )
 
-		todov1beta1.RegisterTodoListServer(
+		authv1.RegisterAuthServiceServer(
 			grpcServer,
-			bridgedriver.MakeGRPCServer(
+			bridgeAuthDriver.MakeGRPCServer(
 				endpoints,
 				kitxgrpc.ServerOptions(grpcServerOptions),
 			),
 		)
+		// todov1beta1.RegisterTodoListServer(
+		// 	grpcServer,
+		// 	bridgeAuthDriver.MakeGRPCServer(
+		// 		endpoints,
+		// 		kitxgrpc.ServerOptions(grpcServerOptions),
+		// 	),
+		// )
 
 	}
 

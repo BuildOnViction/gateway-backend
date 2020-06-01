@@ -22,7 +22,6 @@ import (
 	"github.com/AppsFlyer/go-sundheit/checks"
 	healthhttp "github.com/AppsFlyer/go-sundheit/http"
 	gateway "github.com/anhntbk08/gateway/internal/app/gateway"
-	"github.com/anhntbk08/gateway/internal/app/gateway/todo/tododriver"
 	"github.com/anhntbk08/gateway/internal/common/commonadapter"
 	"github.com/anhntbk08/gateway/internal/platform/appkit"
 	"github.com/anhntbk08/gateway/internal/platform/database"
@@ -263,8 +262,8 @@ func main() {
 		ocgrpc.ServerCompletedRPCsView,
 
 		// Todo
-		tododriver.CreatedTodoItemCountView,
-		tododriver.CompleteTodoItemCountView,
+		// tododriver.CreatedTodoItemCountView,
+		// tododriver.CompleteTodoItemCountView,
 	)
 	emperror.Panic(errors.Wrap(err, "failed to register stat views"))
 
@@ -318,8 +317,8 @@ func main() {
 			h, err := watermill.NewRouter(logger)
 			emperror.Panic(err)
 
-			err = gateway.RegisterEventHandlers(h, subscriber, logger)
-			emperror.Panic(err)
+			// err = gateway.RegisterEventHandlers(h, subscriber, logger)
+			// emperror.Panic(err)
 
 			group.Add(func() error { return h.Run(context.Background()) }, func(e error) { _ = h.Close() })
 		}
