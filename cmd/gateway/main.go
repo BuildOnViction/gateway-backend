@@ -314,13 +314,13 @@ func main() {
 
 			gateway.InitializeApp(httpRouter, grpcServer, publisher, config.App.Storage, db, logger, errorHandler)
 
-			h, err := watermill.NewRouter(logger)
-			emperror.Panic(err)
+			// h, err := watermill.NewRouter(logger)
+			// emperror.Panic(err)
 
 			// err = gateway.RegisterEventHandlers(h, subscriber, logger)
 			// emperror.Panic(err)
 
-			group.Add(func() error { return h.Run(context.Background()) }, func(e error) { _ = h.Close() })
+			// group.Add(func() error { return h.Run(context.Background()) }, func(e error) { _ = h.Close() })
 		}
 
 		logger.Info("listening on address", map[string]interface{}{"address": config.App.HttpAddr})

@@ -7,7 +7,6 @@ package authdriver
 import (
 	"context"
 	"errors"
-	v1 "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
 	"github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/auth"
 	"github.com/go-kit/kit/endpoint"
 	kitxendpoint "github.com/sagikazarmark/kitx/endpoint"
@@ -40,7 +39,7 @@ func MakeEndpoints(service auth.Service, middleware ...endpoint.Middleware) Endp
 
 // RequestTokenRequest is a request struct for RequestToken endpoint.
 type RequestTokenRequest struct {
-	Request v1.RequestTokenRequest
+	Request auth.RqTokenData
 }
 
 // RequestTokenResponse is a response struct for RequestToken endpoint.

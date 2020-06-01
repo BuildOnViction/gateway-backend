@@ -2,16 +2,17 @@ package auth
 
 import (
 	"context"
-
-	bridgev1 "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
 )
 
 // +kit:endpoint:errorStrategy=auth
 
 type Service interface {
-	RequestToken(ctx context.Context, request bridgev1.RequestTokenRequest) (token Token, err error)
+	RequestToken(ctx context.Context, request RqTokenData) (token Token, err error)
 }
 
+type RqTokenData struct {
+	Address string
+}
 type Token struct {
 	ID          string
 	Address     string
@@ -78,7 +79,7 @@ func (validationError) ServiceError() bool {
 	return true
 }
 
-func (s service) RequestToken(ctx context.Context, request bridgev1.RequestTokenRequest) (token Token, err error) {
+func (s service) RequestToken(ctx context.Context, request RqTokenData) (token Token, err error) {
 	return Token{
 		Address:     request.Address,
 		IssuedToken: "hellonewcommer",

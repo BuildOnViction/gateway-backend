@@ -2,6 +2,7 @@ package authdriver
 
 import (
 	"context"
+	"fmt"
 
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
 	appkitgrpc "github.com/sagikazarmark/appkit/transport/grpc"
@@ -26,26 +27,20 @@ func MakeGRPCServer(endpoints Endpoints, options ...kitgrpc.ServerOption) bridge
 }
 
 func decodeRequestLoginTokenGRPCRequest(_ context.Context, request interface{}) (interface{}, error) {
-	req := request.(*bridgev1.AuthServiceLoginRequest)
+	fmt.Println("bridgev1.AuthServiceLoginRequest ", request)
+	req := request.(*bridgev1.RequestTokenRequest)
 
-	return bridgev1.AuthServiceLoginRequest{
-		Address: req.Address,
+	return RequestTokenRequest{
+		Request: bridgeAuth.RqTokenData{
+			Address: req.Address,
+		},
 	}, nil
 }
 
 func encodeRequestLoginTokenGRPCResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(bridgeAuth.Token)
+	resp := response.(RequestTokenResponse)
 
 	return &bridgev1.RequestTokenResponse{
-		Token: resp.IssuedToken,
+		Token: resp.Token.IssuedToken,
 	}, nil
 }
-
-// func marshalItemGRPC(item bridge.Token) *bridgev1.TodoItem {
-// 	return &bridgev1.TodoItem{
-// 		Id:        item.ID,
-// 		Title:     item.Title,
-// 		Completed: item.Completed,
-// 		Order:     int32(item.Order),
-// 	}
-// }

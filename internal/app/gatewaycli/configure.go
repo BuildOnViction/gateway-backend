@@ -1,4 +1,4 @@
-package todocli
+package gatewaycli
 
 import (
 	"contrib.go.opencensus.io/exporter/ocagent"
@@ -8,8 +8,8 @@ import (
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 
-	todov1beta1 "github.com/anhntbk08/gateway/.gen/api/proto/todo/v1beta1"
-	"github.com/anhntbk08/gateway/internal/app/todocli/command"
+	gateway "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
+	"github.com/anhntbk08/gateway/internal/app/gatewaycli/command"
 )
 
 // Configure configures a root command.
@@ -18,7 +18,7 @@ func Configure(rootCmd *cobra.Command) {
 
 	flags := rootCmd.PersistentFlags()
 
-	flags.StringVar(&address, "address", "127.0.0.1:8001", "Todo service address")
+	flags.StringVar(&address, "address", "127.0.0.1:8001", "Bridge gateway service address")
 
 	c := &context{}
 
@@ -41,7 +41,7 @@ func Configure(rootCmd *cobra.Command) {
 		}
 
 		// Configure OpenCensus exporter
-		exporter, err := ocagent.NewExporter(ocagent.WithServiceName("todocli"), ocagent.WithInsecure())
+		exporter, err := ocagent.NewExporter(ocagent.WithServiceName("gatewaycli"), ocagent.WithInsecure())
 		if err != nil {
 			return errors.WrapIf(err, "failed to create exporter")
 		}
@@ -52,7 +52,7 @@ func Configure(rootCmd *cobra.Command) {
 
 		grpcConn = conn
 
-		c.client = todov1beta1.NewTodoListClient(conn)
+		c.client = gateway.NewAuthServiceClient(conn)
 
 		return nil
 	}

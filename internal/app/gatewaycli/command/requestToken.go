@@ -5,50 +5,49 @@ import (
 	"fmt"
 	"time"
 
+	gateway "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
 	"github.com/spf13/cobra"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/status"
-
-	todov1beta1 "github.com/anhntbk08/gateway/.gen/api/proto/todo/v1beta1"
 )
 
 type createOptions struct {
-	title  string
-	client todov1beta1.TodoListClient
+	address string
+	client  gateway.AuthServiceClient
 }
 
-// NewAddCommand creates a new cobra.Command for adding a new item to the list.
-func NewAddCommand(c Context) *cobra.Command {
+// NewRequestTokenCommand creates a new cobra.Command for adding a new item to the list.
+func NewRequestTokenCommand(c Context) *cobra.Command {
 	options := createOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "add",
-		Aliases: []string{"a"},
-		Short:   "Add an item to the list",
+		Use:     "request-token",
+		Aliases: []string{"rt"},
+		Short:   "Request Login token",
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			options.title = args[0]
-			options.client = c.GetTodoClient()
+			options.address = args[0]
+			options.client = c.GetAuthServiceClient()
 
 			cmd.SilenceErrors = true
 			cmd.SilenceUsage = true
 
-			return runCreate(options)
+			return runRequestToken(options)
 		},
 	}
 
 	return cmd
 }
 
-func runCreate(options createOptions) error {
-	req := &todov1beta1.AddItemRequest{
-		Title: options.title,
+func runRequestToken(options createOptions) error {
+	req := &gateway.RequestTokenRequest{
+		Address: options.address,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	resp, err := options.client.AddItem(ctx, req)
+	resp, err := options.client.RequestToken(ctx, req)
 	if err != nil {
 		st := status.Convert(err)
 		for _, detail := range st.Details() {
@@ -66,7 +65,7 @@ func runCreate(options createOptions) error {
 		return err
 	}
 
-	fmt.Printf("Todo item %q with ID %s has been created.", options.title, resp.GetItem().GetId())
+	fmt.Printf("Issued Token for logging in .", options.address, resp.Token)
 
 	return nil
 }

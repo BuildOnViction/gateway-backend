@@ -173,14 +173,6 @@ bin/mga-${MGA_VERSION}:
 	curl -sfL https://git.io/mgatool | bash -s v${MGA_VERSION}
 	@mv bin/mga $@
 
-.PHONY: generate
-generate: bin/mga bin/entc ## Generate code
-	go generate -x ./...
-	mga generate kit endpoint ./internal/app/mga/todo/...
-	mga generate event handler --output subpkg:suffix=gen ./internal/app/mga/todo/...
-	mga generate event dispatcher --output subpkg:suffix=gen ./internal/app/mga/todo/...
-	entc generate ./internal/app/mga/todo/todoadapter/ent/schema
-
 .PHONY: validate-openapi
 validate-openapi: ## Validate the OpenAPI descriptor
 	for api in `ls ${OPENAPI_DESCRIPTOR_DIR}`; do \

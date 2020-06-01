@@ -3,11 +3,8 @@ package authdriver
 import (
 	"context"
 
-	"go.opencensus.io/stats"
-	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 
-	bridgev1 "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
 	authService "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/auth"
 )
 
@@ -19,7 +16,7 @@ type defaultMiddleware struct {
 	service authService.Service
 }
 
-func (m defaultMiddleware) RequestToken(ctx context.Context, request bridgev1.RequestTokenRequest) (authService.Token, error) {
+func (m defaultMiddleware) RequestToken(ctx context.Context, request authService.RqTokenData) (authService.Token, error) {
 	return m.service.RequestToken(ctx, request)
 }
 
@@ -38,7 +35,7 @@ type loggingMiddleware struct {
 	logger authService.Logger
 }
 
-func (mw loggingMiddleware) RequestToken(ctx context.Context, request bridgev1.RequestTokenRequest) (authService.Token, error) {
+func (mw loggingMiddleware) RequestToken(ctx context.Context, request authService.RqTokenData) (authService.Token, error) {
 	logger := mw.logger.WithContext(ctx)
 
 	logger.Info("Request token")
@@ -55,27 +52,27 @@ func (mw loggingMiddleware) RequestToken(ctx context.Context, request bridgev1.R
 
 // Business metrics
 // nolint: gochecknoglobals,lll
-var (
-	CreatedTodoItemCount  = stats.Int64("created_todo_item_count", "Number of todo items created", stats.UnitDimensionless)
-	CompleteTodoItemCount = stats.Int64("complete_todo_item_count", "Number of todo items marked complete", stats.UnitDimensionless)
-)
+// var (
+// 	CreatedTodoItemCount  = stats.Int64("created_todo_item_count", "Number of todo items created", stats.UnitDimensionless)
+// 	CompleteTodoItemCount = stats.Int64("complete_todo_item_count", "Number of todo items marked complete", stats.UnitDimensionless)
+// )
 
-// nolint: gochecknoglobals
-var (
-	CreatedTodoItemCountView = &view.View{
-		Name:        "todo_item_created_count",
-		Description: "Count of todo items created",
-		Measure:     CreatedTodoItemCount,
-		Aggregation: view.Count(),
-	}
+// // nolint: gochecknoglobals
+// var (
+// 	CreatedTodoItemCountView = &view.View{
+// 		Name:        "todo_item_created_count",
+// 		Description: "Count of todo items created",
+// 		Measure:     CreatedTodoItemCount,
+// 		Aggregation: view.Count(),
+// 	}
 
-	CompleteTodoItemCountView = &view.View{
-		Name:        "todo_item_complete_count",
-		Description: "Count of todo items complete",
-		Measure:     CompleteTodoItemCount,
-		Aggregation: view.Count(),
-	}
-)
+// 	CompleteTodoItemCountView = &view.View{
+// 		Name:        "todo_item_complete_count",
+// 		Description: "Count of todo items complete",
+// 		Measure:     CompleteTodoItemCount,
+// 		Aggregation: view.Count(),
+// 	}
+// )
 
 // InstrumentationMiddleware is a service level instrumentation middleware.
 func InstrumentationMiddleware() Middleware {
@@ -92,7 +89,7 @@ type instrumentationMiddleware struct {
 	next authService.Service
 }
 
-func (mw instrumentationMiddleware) RequestToken(ctx context.Context, request bridgev1.RequestTokenRequest) (authService.Token, error) {
+func (mw instrumentationMiddleware) RequestToken(ctx context.Context, request authService.RqTokenData) (authService.Token, error) {
 	token, err := mw.next.RequestToken(ctx, request)
 	if err != nil {
 		return token, err
@@ -102,7 +99,7 @@ func (mw instrumentationMiddleware) RequestToken(ctx context.Context, request br
 		span.AddAttributes(trace.StringAttribute("token", token.IssuedToken))
 	}
 
-	stats.Record(ctx, CreatedTodoItemCount.M(1))
+	// stats.Record(ctx, CreatedTodoItemCount.M(1))
 
 	return token, nil
 }
