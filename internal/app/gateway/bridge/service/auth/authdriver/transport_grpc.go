@@ -2,7 +2,6 @@ package authdriver
 
 import (
 	"context"
-	"fmt"
 
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
 	appkitgrpc "github.com/sagikazarmark/appkit/transport/grpc"
@@ -23,11 +22,16 @@ func MakeGRPCServer(endpoints Endpoints, options ...kitgrpc.ServerOption) bridge
 			kitxgrpc.ErrorResponseEncoder(encodeRequestLoginTokenGRPCResponse, errorEncoder),
 			options...,
 		), errorEncoder),
+		LoginHandler: kitxgrpc.NewErrorEncoderHandler(kitgrpc.NewServer(
+			endpoints.Login,
+			decodeLoginGRPCRequest,
+			kitxgrpc.ErrorResponseEncoder(encodeLoginGRPCResponse, errorEncoder),
+			options...,
+		), errorEncoder),
 	}
 }
 
 func decodeRequestLoginTokenGRPCRequest(_ context.Context, request interface{}) (interface{}, error) {
-	fmt.Println("bridgev1.AuthServiceLoginRequest ", request)
 	req := request.(*bridgev1.RequestTokenRequest)
 
 	return RequestTokenRequest{
@@ -41,6 +45,26 @@ func encodeRequestLoginTokenGRPCResponse(_ context.Context, response interface{}
 	resp := response.(RequestTokenResponse)
 
 	return &bridgev1.RequestTokenResponse{
-		Token: resp.Token.IssuedToken,
+		Token: resp.Token.Token,
+	}, nil
+}
+
+func decodeLoginGRPCRequest(_ context.Context, request interface{}) (interface{}, error) {
+	req := request.(*bridgev1.AuthServiceLoginRequest)
+
+	return LoginRequest{
+		Request: bridgeAuth.Token{
+			Address:   req.Address,
+			Token:     req.Token,
+			Signature: req.Signature,
+		},
+	}, nil
+}
+
+func encodeLoginGRPCResponse(_ context.Context, response interface{}) (interface{}, error) {
+	resp := response.(LoginResponse)
+
+	return &bridgev1.AuthServiceLoginResponse{
+		Success: resp.Success,
 	}, nil
 }

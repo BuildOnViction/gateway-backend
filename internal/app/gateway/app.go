@@ -2,14 +2,13 @@ package mga
 
 import (
 	"context"
-	"database/sql"
 	"net/http"
 
+	"emperror.dev/emperror"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/tracing/opencensus"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
-	"github.com/goph/idgen/ulidgen"
 	"github.com/gorilla/mux"
 	appkitendpoint "github.com/sagikazarmark/appkit/endpoint"
 	"github.com/sagikazarmark/kitx/correlation"
@@ -26,6 +25,7 @@ import (
 	authv1 "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
 	bridgeAuth "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/auth"
 	bridgeAuthDriver "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/auth/authdriver"
+	store "github.com/anhntbk08/gateway/internal/app/gateway/store"
 )
 
 // InitializeApp initializes a new HTTP and a new gRPC application.
@@ -34,7 +34,8 @@ func InitializeApp(
 	grpcServer *grpc.Server,
 	publisher message.Publisher,
 	storage string,
-	db *sql.DB,
+	dbURI string,
+	dbName string,
 	logger Logger,
 	errorHandler ErrorHandler,
 ) {
@@ -48,6 +49,9 @@ func InitializeApp(
 		appkitendpoint.LoggingMiddleware(logger),
 	}
 
+	mongoConnection, err := store.NewMongo(dbURI, dbName)
+	emperror.Panic(err)
+
 	transportErrorHandler := kitxtransport.NewErrorHandler(errorHandler)
 
 	grpcServerOptions := []kitgrpc.ServerOption{
@@ -57,7 +61,7 @@ func InitializeApp(
 
 	{
 		service := bridgeAuth.NewService(
-			ulidgen.NewGenerator(),
+			mongoConnection,
 		)
 		service = bridgeAuthDriver.LoggingMiddleware(logger)(service)
 		service = bridgeAuthDriver.InstrumentationMiddleware()(service)

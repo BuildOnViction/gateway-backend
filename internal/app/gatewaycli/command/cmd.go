@@ -14,5 +14,6 @@ type Context interface {
 func AddCommands(cmd *cobra.Command, c Context) {
 	cmd.AddCommand(
 		NewRequestTokenCommand(c),
+		NewLoginCommand(c),
 	)
 }

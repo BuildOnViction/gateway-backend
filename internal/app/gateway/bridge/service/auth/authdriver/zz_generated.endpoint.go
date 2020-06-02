@@ -26,6 +26,7 @@ type serviceError interface {
 // meant to be used as a helper struct, to collect all of the endpoints into a
 // single parameter.
 type Endpoints struct {
+	Login        endpoint.Endpoint
 	RequestToken endpoint.Endpoint
 }
 
@@ -34,7 +35,50 @@ type Endpoints struct {
 func MakeEndpoints(service auth.Service, middleware ...endpoint.Middleware) Endpoints {
 	mw := kitxendpoint.Combine(middleware...)
 
-	return Endpoints{RequestToken: kitxendpoint.OperationNameMiddleware("auth.RequestToken")(mw(MakeRequestTokenEndpoint(service)))}
+	return Endpoints{
+		Login:        kitxendpoint.OperationNameMiddleware("auth.Login")(mw(MakeLoginEndpoint(service))),
+		RequestToken: kitxendpoint.OperationNameMiddleware("auth.RequestToken")(mw(MakeRequestTokenEndpoint(service))),
+	}
+}
+
+// LoginRequest is a request struct for Login endpoint.
+type LoginRequest struct {
+	Request auth.Token
+}
+
+// LoginResponse is a response struct for Login endpoint.
+type LoginResponse struct {
+	Success bool
+	Err     error
+}
+
+func (r LoginResponse) Failed() error {
+	return r.Err
+}
+
+// MakeLoginEndpoint returns an endpoint for the matching method of the underlying service.
+func MakeLoginEndpoint(service auth.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(LoginRequest)
+
+		success, err := service.Login(ctx, req.Request)
+
+		if err != nil {
+			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
+				return LoginResponse{
+					Err:     err,
+					Success: success,
+				}, err
+			}
+
+			return LoginResponse{
+				Err:     err,
+				Success: success,
+			}, nil
+		}
+
+		return LoginResponse{Success: success}, nil
+	}
 }
 
 // RequestTokenRequest is a request struct for RequestToken endpoint.

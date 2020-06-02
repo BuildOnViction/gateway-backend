@@ -75,7 +75,11 @@ run-%: build-%
 	${BUILD_DIR}/$*
 
 .PHONY: run
-run: $(patsubst cmd/%,run-%,$(wildcard cmd/*)) ## Build and execute a binary
+run:
+# $(patsubst cmd/%,run-%,$(wildcard cmd/*)) ## Build and execute a binary
+	go build  -o ./${BUILD_DIR}/gateway ./cmd/gateway
+	go build  -o ./${BUILD_DIR}/gatewaycli ./cmd/gatewaycli
+	# ./cmd/gateway
 
 .PHONY: clean
 clean: ## Clean builds
@@ -94,7 +98,9 @@ ifeq (${VERBOSE}, 1)
 	go env
 endif
 
-	go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/$* ./cmd/$*
+	# go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/$* ./cmd/$*
+	go build  -o ${BUILD_DIR}/gateway ./cmd/gateway
+	go build  -o ${BUILD_DIR}/gatewaycli ./cmd/gatewaycli
 
 .PHONY: build
 build: goversion ## Build all binaries
@@ -103,7 +109,9 @@ ifeq (${VERBOSE}, 1)
 endif
 
 	@mkdir -p ${BUILD_DIR}
-	go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/ ./cmd/...
+	# go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/ ./cmd/...
+	go build  -o ${BUILD_DIR}/gateway ./cmd/gateway
+	go build  -o ${BUILD_DIR}/gatewaycli ./cmd/gatewaycli
 
 .PHONY: build-release
 build-release: $(patsubst cmd/%,cmd/%/pkged.go,$(wildcard cmd/*)) ## Build all binaries without debug information

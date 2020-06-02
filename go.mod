@@ -5,45 +5,47 @@ go 1.13.5
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.6.0
 	contrib.go.opencensus.io/exporter/prometheus v0.1.0
-	contrib.go.opencensus.io/integrations/ocsql v0.1.5
 	emperror.dev/emperror v0.32.0
 	emperror.dev/errors v0.7.0
 	emperror.dev/handler/logur v0.4.0
-	github.com/99designs/gqlgen v0.11.3
 	github.com/AppsFlyer/go-sundheit v0.2.0
 	github.com/ThreeDotsLabs/watermill v1.1.1
 	github.com/cloudflare/tableflip v1.2.0
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/facebookincubator/ent v0.2.1
-	github.com/go-bdd/gobdd v1.0.1
+	github.com/ethereum/go-ethereum v1.9.14
+	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-kit/kit v0.10.0
-	github.com/go-sql-driver/mysql v1.5.1-0.20200311113236-681ffa848bae
+	github.com/go-sql-driver/mysql v1.4.0
+	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.4.1
-	github.com/goph/idgen v0.4.0
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.4
+	github.com/kr/text v0.2.0 // indirect
 	github.com/markbates/pkger v0.15.1
 	github.com/mccutchen/go-httpbin v0.0.0-20190116014521-c5cb2f4802fa
+	github.com/mitchellh/mapstructure v1.2.2 // indirect
+	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/oklog/run v1.1.0
-	github.com/olekukonko/tablewriter v0.0.4
 	github.com/sagikazarmark/appkit v0.9.0
 	github.com/sagikazarmark/kitx v0.12.0
-	github.com/sagikazarmark/modern-go-application v0.0.0-20200529120957-558c8cf1844f // indirect
 	github.com/sagikazarmark/ocmux v0.2.0
 	github.com/sirupsen/logrus v1.6.0
+	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.0
+	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.5.1
-	github.com/vektah/gqlparser/v2 v2.0.1
-	gitlab.com/techschool/pcbook v0.0.0-20200510132003-f115a898cee9
+	github.com/tomochain/tomochain v1.5.5-0.20200205100840-e42c75d69e61
 	go.opencensus.io v0.22.3
-	golang.org/x/crypto v0.0.0-20191112222119-e1110fd1c708
+	golang.org/x/crypto v0.0.0-20200311171314-f7b00557c8c4
+	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a // indirect
+	golang.org/x/tools v0.0.0-20200329025819-fd4102a86c65 // indirect
 	google.golang.org/genproto v0.0.0-20200507105951-43844f6eee31
 	google.golang.org/grpc v1.29.1
 	google.golang.org/protobuf v1.22.0
+	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
+	gopkg.in/yaml.v2 v2.2.8 // indirect
 	logur.dev/adapter/logrus v0.5.0
 	logur.dev/integration/watermill v0.5.0
 	logur.dev/logur v0.16.2
-	sagikazarmark.dev/mga v0.2.0 // indirect
 )

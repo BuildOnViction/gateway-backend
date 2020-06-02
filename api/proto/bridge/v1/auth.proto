@@ -12,6 +12,8 @@ message RequestTokenResponse { string token = 1; }
 
 message AuthServiceLoginRequest {
   string address = 1;
+  string token = 2;
+  string signature = 3;
 }
 
 message AuthServiceLoginResponse { bool success = 1; }

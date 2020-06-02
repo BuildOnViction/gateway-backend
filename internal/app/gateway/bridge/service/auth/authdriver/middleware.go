@@ -20,6 +20,10 @@ func (m defaultMiddleware) RequestToken(ctx context.Context, request authService
 	return m.service.RequestToken(ctx, request)
 }
 
+func (m defaultMiddleware) Login(ctx context.Context, request authService.Token) (bool, error) {
+	return m.service.Login(ctx, request)
+}
+
 // LoggingMiddleware is a service level logging middleware.
 func LoggingMiddleware(logger authService.Logger) Middleware {
 	return func(next authService.Service) authService.Service {
@@ -45,9 +49,24 @@ func (mw loggingMiddleware) RequestToken(ctx context.Context, request authServic
 		return token, err
 	}
 
-	logger.Info("Requested token", map[string]interface{}{"token": token.IssuedToken})
+	logger.Info("Requested token", map[string]interface{}{"token": token.Token})
 
 	return token, err
+}
+
+func (mw loggingMiddleware) Login(ctx context.Context, request authService.Token) (bool, error) {
+	logger := mw.logger.WithContext(ctx)
+
+	logger.Info(request.Address + " trying to login in ")
+
+	resp, err := mw.next.Login(ctx, request)
+	if err != nil {
+		return false, err
+	}
+
+	logger.Info("Logged in", map[string]interface{}{"address": request.Address})
+
+	return resp, err
 }
 
 // Business metrics
@@ -96,7 +115,7 @@ func (mw instrumentationMiddleware) RequestToken(ctx context.Context, request au
 	}
 
 	if span := trace.FromContext(ctx); span != nil {
-		span.AddAttributes(trace.StringAttribute("token", token.IssuedToken))
+		span.AddAttributes(trace.StringAttribute("token", token.Token))
 	}
 
 	// stats.Record(ctx, CreatedTodoItemCount.M(1))

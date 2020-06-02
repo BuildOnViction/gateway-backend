@@ -2,29 +2,26 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"net/http"
 	_ "net/http/pprof" // register pprof HTTP handlers #nosec
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"contrib.go.opencensus.io/exporter/ocagent"
 	"contrib.go.opencensus.io/exporter/prometheus"
-	"contrib.go.opencensus.io/integrations/ocsql"
+
+	// "contrib.go.opencensus.io/integrations/ocsql"
 	"emperror.dev/emperror"
 	"emperror.dev/errors"
 	"emperror.dev/errors/match"
 	logurhandler "emperror.dev/handler/logur"
 	health "github.com/AppsFlyer/go-sundheit"
-	"github.com/AppsFlyer/go-sundheit/checks"
 	healthhttp "github.com/AppsFlyer/go-sundheit/http"
 	gateway "github.com/anhntbk08/gateway/internal/app/gateway"
 	"github.com/anhntbk08/gateway/internal/common/commonadapter"
 	"github.com/anhntbk08/gateway/internal/platform/appkit"
-	"github.com/anhntbk08/gateway/internal/platform/database"
 	"github.com/anhntbk08/gateway/internal/platform/gosundheit"
 	"github.com/anhntbk08/gateway/internal/platform/log"
 	"github.com/anhntbk08/gateway/internal/platform/watermill"
@@ -212,26 +209,26 @@ func main() {
 	}
 
 	// Register SQL stat views
-	ocsql.RegisterAllViews()
+	// ocsql.RegisterAllViews()
 
 	// Connect to the database
-	logger.Info("connecting to database")
-	dbConnector, err := database.NewConnector(config.Database)
-	emperror.Panic(err)
+	// logger.Info("connecting to database")
+	// dbConnector, err := database.NewConnector(config.Database)
+	// emperror.Panic(err)
 
-	database.SetLogger(logger)
+	// database.SetLogger(logger)
 
-	db := sql.OpenDB(dbConnector)
-	defer db.Close()
+	// db := sql.OpenDB(dbConnector)
+	// defer db.Close()
 
 	// Record DB stats every 5 seconds until we exit
-	defer ocsql.RecordStats(db, 5*time.Second)()
+	// defer ocsql.RecordStats(db, 5*time.Second)()
 
-	// Register database health check
-	_ = healthChecker.RegisterCheck(&health.Config{
-		Check:           checks.Must(checks.NewPingCheck("db.check", db, time.Millisecond*100)),
-		ExecutionPeriod: 3 * time.Second,
-	})
+	// // Register database health check
+	// _ = healthChecker.RegisterCheck(&health.Config{
+	// 	Check:           checks.Must(checks.NewPingCheck("db.check", db, time.Millisecond*100)),
+	// 	ExecutionPeriod: 3 * time.Second,
+	// })
 
 	publisher, subscriber := watermill.NewPubSub(logger)
 	defer publisher.Close()
@@ -260,10 +257,6 @@ func main() {
 		ocgrpc.ServerSentBytesPerRPCView,
 		ocgrpc.ServerLatencyView,
 		ocgrpc.ServerCompletedRPCsView,
-
-		// Todo
-		// tododriver.CreatedTodoItemCountView,
-		// tododriver.CompleteTodoItemCountView,
 	)
 	emperror.Panic(errors.Wrap(err, "failed to register stat views"))
 
@@ -312,7 +305,7 @@ func main() {
 				appkiterrors.IsServiceError, // filter out service errors
 			)
 
-			gateway.InitializeApp(httpRouter, grpcServer, publisher, config.App.Storage, db, logger, errorHandler)
+			gateway.InitializeApp(httpRouter, grpcServer, publisher, config.App.Storage, config.Database.Uri, config.Database.DbName, logger, errorHandler)
 
 			// h, err := watermill.NewRouter(logger)
 			// emperror.Panic(err)

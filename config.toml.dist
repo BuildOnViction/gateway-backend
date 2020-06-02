@@ -25,9 +25,4 @@ grpcAddr = ":8001"
 storage = "inmemory"
 
 [database]
-host = "localhost"
-port = 3306
-user = "root"
-pass = ""
-name = "app"
-params = { collation = "utf8mb4_general_ci" }
+uri = "mongodb://tomobridgejob:anhlavip@localhost:27017/tomobridgejob"
