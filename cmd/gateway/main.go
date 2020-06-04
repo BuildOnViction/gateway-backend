@@ -20,6 +20,10 @@ import (
 	health "github.com/AppsFlyer/go-sundheit"
 	healthhttp "github.com/AppsFlyer/go-sundheit/http"
 	gateway "github.com/anhntbk08/gateway/internal/app/gateway"
+
+	authDriver "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/auth/authdriver"
+	// projectDriver "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/project/projectdriver"
+
 	"github.com/anhntbk08/gateway/internal/common/commonadapter"
 	"github.com/anhntbk08/gateway/internal/platform/appkit"
 	"github.com/anhntbk08/gateway/internal/platform/gosundheit"
@@ -208,28 +212,6 @@ func main() {
 		)
 	}
 
-	// Register SQL stat views
-	// ocsql.RegisterAllViews()
-
-	// Connect to the database
-	// logger.Info("connecting to database")
-	// dbConnector, err := database.NewConnector(config.Database)
-	// emperror.Panic(err)
-
-	// database.SetLogger(logger)
-
-	// db := sql.OpenDB(dbConnector)
-	// defer db.Close()
-
-	// Record DB stats every 5 seconds until we exit
-	// defer ocsql.RecordStats(db, 5*time.Second)()
-
-	// // Register database health check
-	// _ = healthChecker.RegisterCheck(&health.Config{
-	// 	Check:           checks.Must(checks.NewPingCheck("db.check", db, time.Millisecond*100)),
-	// 	ExecutionPeriod: 3 * time.Second,
-	// })
-
 	publisher, subscriber := watermill.NewPubSub(logger)
 	defer publisher.Close()
 	defer subscriber.Close()
@@ -244,19 +226,16 @@ func main() {
 		health.ViewCheckStatusByName,
 		health.ViewCheckExecutionTime,
 
-		// HTTP
-		ochttp.ServerRequestCountView,
-		ochttp.ServerRequestBytesView,
-		ochttp.ServerResponseBytesView,
-		ochttp.ServerLatencyView,
-		ochttp.ServerRequestCountByMethod,
-		ochttp.ServerResponseCountByStatusCode,
-
 		// GRPC
 		ocgrpc.ServerReceivedBytesPerRPCView,
 		ocgrpc.ServerSentBytesPerRPCView,
 		ocgrpc.ServerLatencyView,
 		ocgrpc.ServerCompletedRPCsView,
+
+		// auth services
+		authDriver.RequestLoginTokenCountView,
+		authDriver.LoginCountView,
+		// project services
 	)
 	emperror.Panic(errors.Wrap(err, "failed to register stat views"))
 

@@ -22,9 +22,13 @@ import (
 	"github.com/anhntbk08/gateway/internal/app/gateway/landing/landingdriver"
 
 	// TODO find way to merge all small services part into 1 sub-service with driver, store adaptor ...
-	authv1 "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
+	gatewayv1 "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
 	bridgeAuth "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/auth"
 	bridgeAuthDriver "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/auth/authdriver"
+
+	project "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/project"
+	projectDriver "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/project/projectdriver"
+
 	store "github.com/anhntbk08/gateway/internal/app/gateway/store"
 )
 
@@ -71,14 +75,34 @@ func InitializeApp(
 			kitxendpoint.Combine(endpointMiddleware...),
 		)
 
-		authv1.RegisterAuthServiceServer(
+		gatewayv1.RegisterAuthServiceServer(
 			grpcServer,
 			bridgeAuthDriver.MakeGRPCServer(
 				endpoints,
 				kitxgrpc.ServerOptions(grpcServerOptions),
 			),
 		)
+	}
 
+	{
+		service := project.NewService(
+			mongoConnection,
+		)
+		service = projectDriver.LoggingMiddleware(logger)(service)
+		service = projectDriver.InstrumentationMiddleware()(service)
+
+		endpoints := projectDriver.MakeEndpoints(
+			service,
+			kitxendpoint.Combine(endpointMiddleware...),
+		)
+
+		gatewayv1.RegisterProjectServiceServer(
+			grpcServer,
+			projectDriver.MakeGRPCServer(
+				endpoints,
+				kitxgrpc.ServerOptions(grpcServerOptions),
+			),
+		)
 	}
 
 	landingdriver.RegisterHTTPHandlers(httpRouter)

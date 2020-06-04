@@ -14,11 +14,13 @@ type AuthenSession struct {
 
 // User
 type User struct {
-	ID        bson.ObjectId `json:"id" bson:"_id"`
-	Address   string        `json:"address" bson:"address"`
-	Session   AuthenSession
-	CreatedAt time.Time `json:"createdAt" bson:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
+	ID              bson.ObjectId `json:"id" bson:"_id"`
+	Address         string        `json:"address" bson:"address"`
+	Session         AuthenSession `json:"session" bson:"session"`
+	MaximumProjects uint64        `json:"max_projects" bson:"max_projects"`
+	PaymentPlan     uint8         `json:"payment_plan" bson:"payment_plan"`
+	CreatedAt       time.Time     `json:"createdAt" bson:"createdAt"`
+	UpdatedAt       time.Time     `json:"updatedAt" bson:"updatedAt"`
 }
 
 // UserRecordUpdate

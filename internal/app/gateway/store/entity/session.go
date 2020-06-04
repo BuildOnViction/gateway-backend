@@ -21,31 +21,3 @@ type Session struct {
 type SessionRecordUpdate struct {
 	*Session
 }
-
-// func (csi *Session) GetBSON() (interface{}, error) {
-// 	d := Session{
-// 		Address:   csi.Address,
-// 		CreatedAt: csi.CreatedAt,
-// 		UpdatedAt: csi.UpdatedAt,
-// 	}
-// 	return d, nil
-// }
-
-// GetBSON upsert
-// func (csip SessionRecordUpdate) GetBSON() (interface{}, error) {
-// 	now := time.Now()
-// 	set := bson.M{
-// 		"address":   csip.Address,
-// 		"updatedAt": now,
-// 	}
-// 	setOnInsert := bson.M{
-// 		"_id":       bson.NewObjectId(),
-// 		"createdAt": now,
-// 	}
-// 	update := bson.M{
-// 		"$set":         set,
-// 		"$setOnInsert": setOnInsert,
-// 	}
-
-// 	return update, nil
-// }

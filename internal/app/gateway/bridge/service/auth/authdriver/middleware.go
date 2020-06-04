@@ -3,9 +3,14 @@ package authdriver
 import (
 	"context"
 
-	"go.opencensus.io/trace"
-
+	"emperror.dev/errors"
 	authService "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/auth"
+	. "github.com/anhntbk08/gateway/internal/common"
+	"go.opencensus.io/stats"
+	"go.opencensus.io/stats/view"
+	"go.opencensus.io/trace"
+	"golang.org/x/time/rate"
+	"google.golang.org/grpc/peer"
 )
 
 // Middleware is a service middleware.
@@ -16,7 +21,17 @@ type defaultMiddleware struct {
 	service authService.Service
 }
 
+var limiter = rate.NewLimiter(10, 3)
+
 func (m defaultMiddleware) RequestToken(ctx context.Context, request authService.RqTokenData) (authService.Token, error) {
+	if limiter.Allow() == false {
+		return authService.Token{}, errors.WithStack(ValidationError{Violates: map[string][]string{
+			"request": {
+				"TOO_MANY_REQUESTS",
+				"Too many request",
+			},
+		}})
+	}
 	return m.service.RequestToken(ctx, request)
 }
 
@@ -71,27 +86,27 @@ func (mw loggingMiddleware) Login(ctx context.Context, request authService.Token
 
 // Business metrics
 // nolint: gochecknoglobals,lll
-// var (
-// 	CreatedTodoItemCount  = stats.Int64("created_todo_item_count", "Number of todo items created", stats.UnitDimensionless)
-// 	CompleteTodoItemCount = stats.Int64("complete_todo_item_count", "Number of todo items marked complete", stats.UnitDimensionless)
-// )
+var (
+	RequestLoginTokenCount = stats.Int64("request_login_token_count", "Number of todo items created", stats.UnitDimensionless)
+	LoginCount             = stats.Int64("login_count", "Number of todo items marked complete", stats.UnitDimensionless)
+)
 
-// // nolint: gochecknoglobals
-// var (
-// 	CreatedTodoItemCountView = &view.View{
-// 		Name:        "todo_item_created_count",
-// 		Description: "Count of todo items created",
-// 		Measure:     CreatedTodoItemCount,
-// 		Aggregation: view.Count(),
-// 	}
+// nolint: gochecknoglobals
+var (
+	RequestLoginTokenCountView = &view.View{
+		Name:        "request_login_token_count",
+		Description: "Count of number requests for login token",
+		Measure:     RequestLoginTokenCount,
+		Aggregation: view.Count(),
+	}
 
-// 	CompleteTodoItemCountView = &view.View{
-// 		Name:        "todo_item_complete_count",
-// 		Description: "Count of todo items complete",
-// 		Measure:     CompleteTodoItemCount,
-// 		Aggregation: view.Count(),
-// 	}
-// )
+	LoginCountView = &view.View{
+		Name:        "login_count",
+		Description: "Count of login request",
+		Measure:     LoginCount,
+		Aggregation: view.Count(),
+	}
+)
 
 // InstrumentationMiddleware is a service level instrumentation middleware.
 func InstrumentationMiddleware() Middleware {
@@ -114,11 +129,34 @@ func (mw instrumentationMiddleware) RequestToken(ctx context.Context, request au
 		return token, err
 	}
 
-	if span := trace.FromContext(ctx); span != nil {
-		span.AddAttributes(trace.StringAttribute("token", token.Token))
+	p, ok := peer.FromContext(ctx)
+
+	if ok {
+		if span := trace.FromContext(ctx); span != nil {
+			span.AddAttributes(trace.StringAttribute("ip", p.Addr.String()))
+		}
+	} else {
+		if span := trace.FromContext(ctx); span != nil {
+			span.AddAttributes(trace.StringAttribute("address", request.Address))
+		}
 	}
 
-	// stats.Record(ctx, CreatedTodoItemCount.M(1))
+	stats.Record(ctx, RequestLoginTokenCount.M(1))
+
+	return token, nil
+}
+
+func (mw instrumentationMiddleware) Login(ctx context.Context, request authService.Token) (bool, error) {
+	token, err := mw.next.Login(ctx, request)
+	if err != nil {
+		return token, err
+	}
+
+	if span := trace.FromContext(ctx); span != nil {
+		span.AddAttributes(trace.StringAttribute("address", request.Address))
+	}
+
+	stats.Record(ctx, LoginCount.M(1))
 
 	return token, nil
 }

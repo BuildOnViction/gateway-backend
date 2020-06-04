@@ -1,6 +1,6 @@
 module github.com/anhntbk08/gateway
 
-go 1.13.5
+go 1.14
 
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.6.0
@@ -10,6 +10,8 @@ require (
 	emperror.dev/handler/logur v0.4.0
 	github.com/AppsFlyer/go-sundheit v0.2.0
 	github.com/ThreeDotsLabs/watermill v1.1.1
+	github.com/btcsuite/btcd v0.20.1-beta
+	github.com/btcsuite/btcutil v1.0.2 // indirect
 	github.com/cloudflare/tableflip v1.2.0
 	github.com/ethereum/go-ethereum v1.9.14
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
@@ -39,11 +41,13 @@ require (
 	go.opencensus.io v0.22.3
 	golang.org/x/crypto v0.0.0-20200311171314-f7b00557c8c4
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a // indirect
+	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 	golang.org/x/tools v0.0.0-20200329025819-fd4102a86c65 // indirect
 	google.golang.org/genproto v0.0.0-20200507105951-43844f6eee31
 	google.golang.org/grpc v1.29.1
 	google.golang.org/protobuf v1.22.0
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
+	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 	logur.dev/adapter/logrus v0.5.0
 	logur.dev/integration/watermill v0.5.0

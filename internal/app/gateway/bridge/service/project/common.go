@@ -1,4 +1,4 @@
-package bridge
+package project
 
 import (
 	"github.com/anhntbk08/gateway/internal/common"
@@ -12,12 +12,3 @@ type Logger = common.Logger
 
 // ErrorHandler handles an error.
 type ErrorHandler = common.ErrorHandler
-
-func LimitRequestMiddleware(logger authService.Logger) Middleware {
-	return func(next authService.Service) authService.Service {
-		return loggingMiddleware{
-			next:   next,
-			logger: logger,
-		}
-	}
-}

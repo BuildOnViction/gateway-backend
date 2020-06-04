@@ -8,6 +8,7 @@ import (
 type Mongo struct {
 	UserDao    *entity.UserDao
 	SessionDao *entity.SessionDao
+	ProjectDao *entity.ProjectDao
 }
 
 // NewMongo new database instace
@@ -20,5 +21,6 @@ func NewMongo(url string, dbname string) (*Mongo, error) {
 	return &Mongo{
 		UserDao:    entity.NewUserDao(dbname),
 		SessionDao: entity.NewSessionDao(dbname),
+		ProjectDao: entity.NewProjectDao(dbname),
 	}, nil
 }

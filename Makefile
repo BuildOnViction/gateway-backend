@@ -34,7 +34,7 @@ BUF_VERSION = 0.11.0
 PROTOC_GEN_KIT_VERSION = 0.0.2
 MGA_VERSION = 0.2.0
 
-GOLANG_VERSION = 1.13.5
+GOLANG_VERSION = 1.14
 
 # Add the ability to override some variables
 # Use with care
