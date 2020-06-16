@@ -77,7 +77,7 @@ func runLogin(options loginOptions) error {
 		return err
 	}
 
-	fmt.Println("Login result: ", resp.Success)
+	fmt.Println("Login result: ", resp.AccessToken)
 
 	return nil
 }

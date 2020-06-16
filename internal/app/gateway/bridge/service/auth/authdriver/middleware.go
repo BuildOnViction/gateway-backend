@@ -35,7 +35,7 @@ func (m defaultMiddleware) RequestToken(ctx context.Context, request authService
 	return m.service.RequestToken(ctx, request)
 }
 
-func (m defaultMiddleware) Login(ctx context.Context, request authService.Token) (bool, error) {
+func (m defaultMiddleware) Login(ctx context.Context, request authService.Token) (string, error) {
 	return m.service.Login(ctx, request)
 }
 
@@ -69,14 +69,14 @@ func (mw loggingMiddleware) RequestToken(ctx context.Context, request authServic
 	return token, err
 }
 
-func (mw loggingMiddleware) Login(ctx context.Context, request authService.Token) (bool, error) {
+func (mw loggingMiddleware) Login(ctx context.Context, request authService.Token) (string, error) {
 	logger := mw.logger.WithContext(ctx)
 
 	logger.Info(request.Address + " trying to login in ")
 
 	resp, err := mw.next.Login(ctx, request)
 	if err != nil {
-		return false, err
+		return "", err
 	}
 
 	logger.Info("Logged in", map[string]interface{}{"address": request.Address})
@@ -94,14 +94,14 @@ var (
 // nolint: gochecknoglobals
 var (
 	RequestLoginTokenCountView = &view.View{
-		Name:        "request_login_token_count",
+		Name:        "auth.request_login_token_count",
 		Description: "Count of number requests for login token",
 		Measure:     RequestLoginTokenCount,
 		Aggregation: view.Count(),
 	}
 
 	LoginCountView = &view.View{
-		Name:        "login_count",
+		Name:        "auth.login_count",
 		Description: "Count of login request",
 		Measure:     LoginCount,
 		Aggregation: view.Count(),
@@ -146,7 +146,7 @@ func (mw instrumentationMiddleware) RequestToken(ctx context.Context, request au
 	return token, nil
 }
 
-func (mw instrumentationMiddleware) Login(ctx context.Context, request authService.Token) (bool, error) {
+func (mw instrumentationMiddleware) Login(ctx context.Context, request authService.Token) (string, error) {
 	token, err := mw.next.Login(ctx, request)
 	if err != nil {
 		return token, err

@@ -16,8 +16,8 @@ type defaultMiddleware struct {
 	service projectService.Service
 }
 
-func (m defaultMiddleware) Create(ctx context.Context, name, user string) (entity.Project, error) {
-	return m.service.Create(ctx, name, user)
+func (m defaultMiddleware) Create(ctx context.Context, name string) (entity.Project, error) {
+	return m.service.Create(ctx, name)
 }
 
 func (m defaultMiddleware) Delete(ctx context.Context, id string) (bool, error) {
@@ -39,12 +39,12 @@ type loggingMiddleware struct {
 	logger projectService.Logger
 }
 
-func (mw loggingMiddleware) Create(ctx context.Context, name, user string) (entity.Project, error) {
+func (mw loggingMiddleware) Create(ctx context.Context, name string) (entity.Project, error) {
 	// logger := mw.logger.WithContext(ctx)
 
 	// logger.Info(request.Address + " trying to create project ")
 
-	resp, err := mw.next.Create(ctx, name, user)
+	resp, err := mw.next.Create(ctx, name)
 	if err != nil {
 		return entity.Project{}, err
 	}
@@ -96,18 +96,3 @@ type instrumentationMiddleware struct {
 	projectService.Service
 	next projectService.Service
 }
-
-// func (mw instrumentationMiddleware) RequestToken(ctx context.Context, request projectService.RqTokenData) (projectService.Token, error) {
-// 	token, err := mw.next.RequestToken(ctx, request)
-// 	if err != nil {
-// 		return token, err
-// 	}
-
-// 	if span := trace.FromContext(ctx); span != nil {
-// 		span.AddAttributes(trace.StringAttribute("token", token.Token))
-// 	}
-
-// 	// stats.Record(ctx, CreatedTodoItemCount.M(1))
-
-// 	return token, nil
-// }

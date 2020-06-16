@@ -10,9 +10,9 @@ require (
 	emperror.dev/handler/logur v0.4.0
 	github.com/AppsFlyer/go-sundheit v0.2.0
 	github.com/ThreeDotsLabs/watermill v1.1.1
-	github.com/btcsuite/btcd v0.20.1-beta
-	github.com/btcsuite/btcutil v1.0.2 // indirect
+	github.com/anhntbk08/machinery v1.7.5 // indirect
 	github.com/cloudflare/tableflip v1.2.0
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/ethereum/go-ethereum v1.9.14
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-kit/kit v0.10.0
@@ -21,12 +21,14 @@ require (
 	github.com/golang/protobuf v1.4.1
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.4
+	github.com/jnewmano/grpc-json-proxy v0.0.0-20200427184142-6696b5a3ab05
 	github.com/kr/text v0.2.0 // indirect
 	github.com/markbates/pkger v0.15.1
 	github.com/mccutchen/go-httpbin v0.0.0-20190116014521-c5cb2f4802fa
 	github.com/mitchellh/mapstructure v1.2.2 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/oklog/run v1.1.0
+	github.com/rs/xid v1.2.1
 	github.com/sagikazarmark/appkit v0.9.0
 	github.com/sagikazarmark/kitx v0.12.0
 	github.com/sagikazarmark/ocmux v0.2.0

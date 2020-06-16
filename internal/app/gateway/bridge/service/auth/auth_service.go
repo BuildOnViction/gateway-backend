@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"emperror.dev/errors"
-
+	. "github.com/anhntbk08/gateway/internal/app/gateway/jwt"
 	. "github.com/anhntbk08/gateway/internal/app/gateway/store"
 	"github.com/anhntbk08/gateway/internal/app/gateway/store/entity"
 	. "github.com/anhntbk08/gateway/internal/common"
@@ -21,7 +21,7 @@ import (
 
 type Service interface {
 	RequestToken(ctx context.Context, request RqTokenData) (token Token, err error)
-	Login(ctx context.Context, request Token) (success bool, err error)
+	Login(ctx context.Context, request Token) (accessToken string, err error)
 }
 
 type RqTokenData struct {
@@ -36,12 +36,14 @@ type Token struct {
 }
 
 type service struct {
-	db *Mongo
+	db      *Mongo
+	authKey string
 }
 
-func NewService(db *Mongo) Service {
+func NewService(db *Mongo, authKey string) Service {
 	return &service{
-		db: db,
+		db:      db,
+		authKey: authKey,
 	}
 }
 
@@ -113,9 +115,9 @@ func (s service) RequestToken(ctx context.Context, request RqTokenData) (token T
 	}, err
 }
 
-func (s service) Login(ctx context.Context, request Token) (success bool, err error) {
+func (s service) Login(ctx context.Context, request Token) (accessToken string, err error) {
 	if !IsValidAddress(request.Address) {
-		return false, errors.WithStack(ValidationError{Violates: map[string][]string{
+		return "", errors.WithStack(ValidationError{Violates: map[string][]string{
 			"address": {
 				"AUTH.REQUEST_TOKEN.INVALID_ADDRESS",
 				"Invalid address " + err.Error(),
@@ -124,7 +126,7 @@ func (s service) Login(ctx context.Context, request Token) (success bool, err er
 	}
 
 	if _, err := s.db.SessionDao.IsValidToken(request.Address, request.Token); err != nil {
-		return false, errors.WithStack(ValidationError{Violates: map[string][]string{
+		return "", errors.WithStack(ValidationError{Violates: map[string][]string{
 			"token": {
 				"AUTH.LOGIN.INVALID_TOKEN",
 				"Invalid token " + err.Error(),
@@ -133,23 +135,28 @@ func (s service) Login(ctx context.Context, request Token) (success bool, err er
 	}
 
 	if valid, err := IsValidateSignature(request.Address, request.Token, request.Signature); !valid {
-		return false, errors.WithStack(ValidationError{Violates: map[string][]string{
+		return "", errors.WithStack(ValidationError{Violates: map[string][]string{
 			"signature": {
 				"AUTH.LOGIN.INVALID_SIGNATURE",
 				"Invalid signature " + err.Error(),
 			},
 		}})
 	}
+	logintoken, err := GenerateToken([]byte(s.authKey), request.Address)
+
+	if err != nil {
+		return "", err
+	}
+
 	s.db.SessionDao.Used(request.Token)
 	err = s.db.UserDao.Upsert(&entity.User{
 		Address: request.Address,
 		Session: entity.AuthenSession{
-			Signature: request.Signature,
 			ExpiredAt: time.Now().Add(time.Hour * 24),
-			Token:     request.Token,
+			Token:     logintoken,
 		},
 		UpdatedAt: time.Now(),
 	})
 
-	return true, err
+	return logintoken, err
 }

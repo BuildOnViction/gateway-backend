@@ -65,6 +65,6 @@ func encodeLoginGRPCResponse(_ context.Context, response interface{}) (interface
 	resp := response.(LoginResponse)
 
 	return &bridgev1.AuthServiceLoginResponse{
-		Success: resp.Success,
+		AccessToken: resp.AccessToken,
 	}, nil
 }

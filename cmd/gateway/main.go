@@ -20,8 +20,8 @@ import (
 	health "github.com/AppsFlyer/go-sundheit"
 	healthhttp "github.com/AppsFlyer/go-sundheit/http"
 	gateway "github.com/anhntbk08/gateway/internal/app/gateway"
-
 	authDriver "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/auth/authdriver"
+
 	// projectDriver "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/project/projectdriver"
 
 	"github.com/anhntbk08/gateway/internal/common/commonadapter"
@@ -32,6 +32,8 @@ import (
 	"github.com/cloudflare/tableflip"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+
+	// _ "github.com/jnewmano/grpc-json-proxy/codec"
 	"github.com/oklog/run"
 	"github.com/sagikazarmark/appkit/buildinfo"
 	appkiterrors "github.com/sagikazarmark/appkit/errors"
@@ -93,7 +95,7 @@ func main() {
 		emperror.Panic(errors.Wrap(err, "failed to read configuration"))
 	}
 
-	var config configuration
+	var config Configuration
 	err = v.Unmarshal(&config)
 	emperror.Panic(errors.Wrap(err, "failed to unmarshal configuration"))
 
@@ -284,7 +286,7 @@ func main() {
 				appkiterrors.IsServiceError, // filter out service errors
 			)
 
-			gateway.InitializeApp(httpRouter, grpcServer, publisher, config.App.Storage, config.Database.Uri, config.Database.DbName, logger, errorHandler)
+			gateway.InitializeApp(httpRouter, grpcServer, publisher, config.Database, config.JWT, logger, errorHandler)
 
 			// h, err := watermill.NewRouter(logger)
 			// emperror.Panic(err)

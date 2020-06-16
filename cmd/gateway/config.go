@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
+	"github.com/anhntbk08/gateway/internal/common"
 	"github.com/anhntbk08/gateway/internal/platform/database"
 	"github.com/anhntbk08/gateway/internal/platform/log"
 	"github.com/anhntbk08/gateway/internal/platform/opencensus"
@@ -16,7 +17,7 @@ import (
 
 // configuration holds any kind of configuration that comes from the outside world and
 // is necessary for running the application.
-type configuration struct {
+type Configuration struct {
 	// Log configuration
 	Log log.Config
 
@@ -42,15 +43,17 @@ type configuration struct {
 
 	// Database connection information
 	Database database.Config
+
+	JWT common.JWT
 }
 
 // Process post-processes configuration after loading it.
-func (configuration) Process() error {
+func (Configuration) Process() error {
 	return nil
 }
 
 // Validate validates the configuration.
-func (c configuration) Validate() error {
+func (c Configuration) Validate() error {
 	if c.Telemetry.Addr == "" {
 		return errors.New("telemetry http server address is required")
 	}

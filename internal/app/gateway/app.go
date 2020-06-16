@@ -1,4 +1,4 @@
-package mga
+package gateway
 
 import (
 	"context"
@@ -15,7 +15,6 @@ import (
 	kitxendpoint "github.com/sagikazarmark/kitx/endpoint"
 	kitxtransport "github.com/sagikazarmark/kitx/transport"
 	kitxgrpc "github.com/sagikazarmark/kitx/transport/grpc"
-
 	"google.golang.org/grpc"
 
 	"github.com/anhntbk08/gateway/internal/app/gateway/httpbin"
@@ -30,6 +29,9 @@ import (
 	projectDriver "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/project/projectdriver"
 
 	store "github.com/anhntbk08/gateway/internal/app/gateway/store"
+	"github.com/anhntbk08/gateway/internal/common"
+	"github.com/anhntbk08/gateway/internal/platform/database"
+	gokitjwt "github.com/go-kit/kit/auth/jwt"
 )
 
 // InitializeApp initializes a new HTTP and a new gRPC application.
@@ -37,9 +39,8 @@ func InitializeApp(
 	httpRouter *mux.Router,
 	grpcServer *grpc.Server,
 	publisher message.Publisher,
-	storage string,
-	dbURI string,
-	dbName string,
+	dbConfig database.Config,
+	jwtConfig common.JWT,
 	logger Logger,
 	errorHandler ErrorHandler,
 ) {
@@ -53,19 +54,19 @@ func InitializeApp(
 		appkitendpoint.LoggingMiddleware(logger),
 	}
 
-	mongoConnection, err := store.NewMongo(dbURI, dbName)
+	mongoConnection, err := store.NewMongo(dbConfig.Uri, dbConfig.DbName)
 	emperror.Panic(err)
 
 	transportErrorHandler := kitxtransport.NewErrorHandler(errorHandler)
 
 	grpcServerOptions := []kitgrpc.ServerOption{
 		kitgrpc.ServerErrorHandler(transportErrorHandler),
-		kitgrpc.ServerBefore(correlation.GRPCToContext()),
 	}
 
 	{
 		service := bridgeAuth.NewService(
 			mongoConnection,
+			jwtConfig.Key,
 		)
 		service = bridgeAuthDriver.LoggingMiddleware(logger)(service)
 		service = bridgeAuthDriver.InstrumentationMiddleware()(service)
@@ -96,10 +97,15 @@ func InitializeApp(
 			kitxendpoint.Combine(endpointMiddleware...),
 		)
 
+		grpcServerOptions = append(grpcServerOptions,
+			kitgrpc.ServerBefore(gokitjwt.GRPCToContext()),
+		)
+
 		gatewayv1.RegisterProjectServiceServer(
 			grpcServer,
 			projectDriver.MakeGRPCServer(
 				endpoints,
+				jwtConfig.Key,
 				kitxgrpc.ServerOptions(grpcServerOptions),
 			),
 		)

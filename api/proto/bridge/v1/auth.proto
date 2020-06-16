@@ -16,7 +16,7 @@ message AuthServiceLoginRequest {
   string signature = 3;
 }
 
-message AuthServiceLoginResponse { bool success = 1; }
+message AuthServiceLoginResponse { string access_token = 1; }
 
 service AuthService {
   rpc RequestToken(RequestTokenRequest) returns (RequestTokenResponse) {};

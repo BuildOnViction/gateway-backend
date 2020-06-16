@@ -21,8 +21,12 @@ enabled = false
 [app]
 httpAddr = ":8000"
 grpcAddr = ":8001"
-
 storage = "inmemory"
 
 [database]
 uri = "mongodb://tomobridgejob:anhlavip@localhost:27017/tomobridgejob"
+dbName = "tomobridgejob"
+
+[jwt]
+expiredTime = 1440 # in minutes
+key="RTuwer@&HdfYjnP"

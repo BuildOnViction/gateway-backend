@@ -5,9 +5,14 @@ import (
 )
 
 type context struct {
-	client gateway.AuthServiceClient
+	client  gateway.AuthServiceClient
+	project gateway.ProjectServiceClient
 }
 
 func (c *context) GetAuthServiceClient() gateway.AuthServiceClient {
 	return c.client
+}
+
+func (c *context) GetProjectServiceClient() gateway.ProjectServiceClient {
+	return c.project
 }

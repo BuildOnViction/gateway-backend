@@ -8,6 +8,7 @@ import (
 // Context represents the application context.
 type Context interface {
 	GetAuthServiceClient() gateway.AuthServiceClient
+	GetProjectServiceClient() gateway.ProjectServiceClient
 }
 
 // AddCommands adds all the commands from cli/command to the root command.
@@ -15,5 +16,6 @@ func AddCommands(cmd *cobra.Command, c Context) {
 	cmd.AddCommand(
 		NewRequestTokenCommand(c),
 		NewLoginCommand(c),
+		NewCreateProjectCommand(c),
 	)
 }

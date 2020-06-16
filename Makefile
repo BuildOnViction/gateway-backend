@@ -1,5 +1,3 @@
-# A Self-Documenting Makefile: http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
-
 OS = $(shell uname | tr A-Z a-z)
 export PATH := $(abspath bin/):${PATH}
 
@@ -21,6 +19,8 @@ ifeq ($(filter -v,${GOARGS}),)
 endif
 TEST_FORMAT = short-verbose
 endif
+GOARCH = amd64
+GOOS = linux
 
 # Project variables
 OPENAPI_DESCRIPTOR_DIR = api/openapi
@@ -75,10 +75,7 @@ run-%: build-%
 	${BUILD_DIR}/$*
 
 .PHONY: run
-run:
-# $(patsubst cmd/%,run-%,$(wildcard cmd/*)) ## Build and execute a binary
-	go build  -o ./${BUILD_DIR}/gateway ./cmd/gateway
-	go build  -o ./${BUILD_DIR}/gatewaycli ./cmd/gatewaycli
+run: $(patsubst cmd/%,run-%,$(wildcard cmd/*)) ## Build and execute a binary
 	# ./cmd/gateway
 
 .PHONY: clean
@@ -98,9 +95,8 @@ ifeq (${VERBOSE}, 1)
 	go env
 endif
 
-	# go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/$* ./cmd/$*
-	go build  -o ${BUILD_DIR}/gateway ./cmd/gateway
-	go build  -o ${BUILD_DIR}/gatewaycli ./cmd/gatewaycli
+	GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=1 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/$* ./cmd/$*
+
 
 .PHONY: build
 build: goversion ## Build all binaries
@@ -109,9 +105,9 @@ ifeq (${VERBOSE}, 1)
 endif
 
 	@mkdir -p ${BUILD_DIR}
-	# go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/ ./cmd/...
-	go build  -o ${BUILD_DIR}/gateway ./cmd/gateway
-	go build  -o ${BUILD_DIR}/gatewaycli ./cmd/gatewaycli
+	GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=1 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/ ./cmd/...
+	# go build  -o ${BUILD_DIR}/gateway ./cmd/gateway
+	# go build  -o ${BUILD_DIR}/gatewaycli ./cmd/gatewaycli
 
 .PHONY: build-release
 build-release: $(patsubst cmd/%,cmd/%/pkged.go,$(wildcard cmd/*)) ## Build all binaries without debug information
@@ -123,14 +119,14 @@ build-debug: ## Build all binaries with remote debugging capabilities
 
 bin/pkger:
 	@mkdir -p bin
-	go build -o bin/pkger github.com/markbates/pkger/cmd/pkger
+	GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=1 go build -o bin/pkger github.com/markbates/pkger/cmd/pkger
 
 cmd/%/pkged.go: bin/pkger ## Embed static files
 	bin/pkger -o cmd/$*
 
 bin/entc:
 	@mkdir -p bin
-	go build -o bin/entc github.com/facebookincubator/ent/cmd/entc
+	GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=1 go build -o bin/entc github.com/facebookincubator/ent/cmd/entc
 
 .PHONY: check
 check: test-all lint ## Run tests and linters
@@ -239,14 +235,6 @@ proto: bin/protoc bin/protoc-gen-go bin/protoc-gen-kit buf ## Generate client an
 	mkdir -p .gen/proto
 
 	protoc -I bin/protoc-${PROTOC_VERSION} -I api/proto --go_out=plugins=grpc,import_path=$(shell go list .):.gen/api/proto --kit_out=.gen/api/proto $(shell find api/proto -name '*.proto')
-
-bin/gqlgen: go.mod
-	@mkdir -p bin
-	go build -o bin/gqlgen github.com/99designs/gqlgen
-
-.PHONY: graphql
-graphql: bin/gqlgen ## Generate GraphQL code
-	bin/gqlgen
 
 release-%: TAG_PREFIX = v
 release-%:

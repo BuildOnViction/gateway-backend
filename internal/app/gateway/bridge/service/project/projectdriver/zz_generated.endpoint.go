@@ -41,7 +41,6 @@ func MakeEndpoints(service project.Service, middleware ...endpoint.Middleware) E
 // CreateRequest is a request struct for Create endpoint.
 type CreateRequest struct {
 	Name string
-	User string
 }
 
 // CreateResponse is a response struct for Create endpoint.
@@ -59,7 +58,7 @@ func MakeCreateEndpoint(service project.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(CreateRequest)
 
-		project, err := service.Create(ctx, req.Name, req.User)
+		project, err := service.Create(ctx, req.Name)
 
 		if err != nil {
 			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {

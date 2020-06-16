@@ -53,7 +53,7 @@ func Configure(rootCmd *cobra.Command) {
 		grpcConn = conn
 
 		c.client = gateway.NewAuthServiceClient(conn)
-
+		c.project = gateway.NewProjectServiceClient(conn)
 		return nil
 	}
 

@@ -48,8 +48,8 @@ type LoginRequest struct {
 
 // LoginResponse is a response struct for Login endpoint.
 type LoginResponse struct {
-	Success bool
-	Err     error
+	AccessToken string
+	Err         error
 }
 
 func (r LoginResponse) Failed() error {
@@ -61,23 +61,23 @@ func MakeLoginEndpoint(service auth.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(LoginRequest)
 
-		success, err := service.Login(ctx, req.Request)
+		accessToken, err := service.Login(ctx, req.Request)
 
 		if err != nil {
 			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
 				return LoginResponse{
-					Err:     err,
-					Success: success,
+					AccessToken: accessToken,
+					Err:         err,
 				}, err
 			}
 
 			return LoginResponse{
-				Err:     err,
-				Success: success,
+				AccessToken: accessToken,
+				Err:         err,
 			}, nil
 		}
 
-		return LoginResponse{Success: success}, nil
+		return LoginResponse{AccessToken: accessToken}, nil
 	}
 }
 

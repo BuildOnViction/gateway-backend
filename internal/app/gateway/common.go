@@ -1,4 +1,4 @@
-package mga
+package gateway
 
 import (
 	"github.com/anhntbk08/gateway/internal/common"

@@ -3,9 +3,12 @@ package project
 import (
 	"context"
 	"errors"
+	"fmt"
 
+	emperrorErr "emperror.dev/errors"
 	. "github.com/anhntbk08/gateway/internal/app/gateway/store"
 	"github.com/anhntbk08/gateway/internal/app/gateway/store/entity"
+	"github.com/rs/xid"
 	// . "github.com/anhntbk08/gateway/internal/common"
 	// . "github.com/anhntbk08/gateway/internal/app/gateway/store/entity"
 )
@@ -13,7 +16,7 @@ import (
 // +kit:endpoint:errorStrategy=project
 
 type Service interface {
-	Create(ctx context.Context, name string, user string) (project entity.Project, err error)
+	Create(ctx context.Context, name string) (project entity.Project, err error)
 	// List(ctx context.Context) (projects []entity.Project, err error)
 	// Update(ctx context.Context, project entity.Project) (success bool, err error)
 	// Delete(ctx context.Context, id string) (success bool, err error)
@@ -30,22 +33,27 @@ func NewService(db *Mongo) Service {
 	}
 }
 
-// func genProjectID(name, user) {
+func (s service) Create(ctx context.Context, name string) (entity.Project, error) {
+	user := ctx.Value("User").(string)
 
-// }
+	userDao, err := s.db.UserDao.IsExist(user)
+	if err != nil {
+		return entity.Project{}, emperrorErr.WithStack(errors.New("User not exists"))
+	}
 
-func (s service) Create(ctx context.Context, name string, user string) (project entity.Project, err error) {
-	return entity.Project{
-			Name: name,
-			Keys: entity.Keys{
-				ID: "12313123123",
-			},
-		}, s.db.ProjectDao.Create(&entity.Project{
-			Name: name,
-			Keys: entity.Keys{
-				ID: "12313123123",
-			},
-		})
+	project := entity.Project{
+		Name: name,
+		Keys: entity.Keys{
+			ID:     xid.New().String(),
+			Secret: xid.New().String(),
+		},
+		User: userDao.ID,
+	}
+
+	err = s.db.ProjectDao.Create(&project)
+	fmt.Println(err)
+
+	return project, emperrorErr.WithStack(err)
 }
 
 func (s service) List(ctx context.Context) (projects []entity.Project, err error) {

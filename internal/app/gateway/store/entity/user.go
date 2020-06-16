@@ -7,7 +7,6 @@ import (
 )
 
 type AuthenSession struct {
-	Signature string    `json:"signature" bson:"signature"`
 	Token     string    `json:"token" bson:"token"`
 	ExpiredAt time.Time `json:"expiredAt" bson:"expiredAt"`
 }
