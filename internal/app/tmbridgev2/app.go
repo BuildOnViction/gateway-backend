@@ -17,18 +17,18 @@ import (
 	kitxgrpc "github.com/sagikazarmark/kitx/transport/grpc"
 	"google.golang.org/grpc"
 
-	"github.com/anhntbk08/gateway/internal/app/gateway/httpbin"
-	"github.com/anhntbk08/gateway/internal/app/gateway/landing/landingdriver"
+	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/httpbin"
+	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/landing/landingdriver"
 
 	// TODO find way to merge all small services part into 1 sub-service with driver, store adaptor ...
 	gatewayv1 "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
-	bridgeAuth "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/auth"
-	bridgeAuthDriver "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/auth/authdriver"
+	bridgeAuth "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bridge/service/auth"
+	bridgeAuthDriver "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bridge/service/auth/authdriver"
 
-	project "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/project"
-	projectDriver "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/project/projectdriver"
+	project "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bridge/service/project"
+	projectDriver "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bridge/service/project/projectdriver"
 
-	store "github.com/anhntbk08/gateway/internal/app/gateway/store"
+	store "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store"
 	"github.com/anhntbk08/gateway/internal/common"
 	"github.com/anhntbk08/gateway/internal/platform/database"
 	gokitjwt "github.com/go-kit/kit/auth/jwt"

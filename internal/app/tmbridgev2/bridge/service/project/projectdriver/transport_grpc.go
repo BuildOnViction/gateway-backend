@@ -4,7 +4,7 @@ import (
 	"context"
 
 	bridgev1 "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
-	. "github.com/anhntbk08/gateway/internal/app/gateway/jwt"
+	. "github.com/anhntbk08/gateway/internal/app/tmbridgev2/jwt"
 	"github.com/dgrijalva/jwt-go"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
 	appkitgrpc "github.com/sagikazarmark/appkit/transport/grpc"

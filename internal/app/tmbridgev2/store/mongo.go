@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/anhntbk08/gateway/internal/app/gateway/store/entity"
+	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
 )
 
 // Mongo database access object

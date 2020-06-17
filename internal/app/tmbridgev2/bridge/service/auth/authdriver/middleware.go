@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"emperror.dev/errors"
-	authService "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/auth"
+	authService "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bridge/service/auth"
 	. "github.com/anhntbk08/gateway/internal/common"
 	"go.opencensus.io/stats"
 	"go.opencensus.io/stats/view"

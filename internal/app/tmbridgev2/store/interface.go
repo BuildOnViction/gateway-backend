@@ -1,6 +1,6 @@
 package database
 
-import . "github.com/anhntbk08/gateway/internal/app/gateway/store/entity"
+import . "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
 
 // type Databaser interface {
 // 	RequestLoginToken(address string) (interface{}, error)

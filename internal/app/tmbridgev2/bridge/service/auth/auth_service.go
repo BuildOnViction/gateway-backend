@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"emperror.dev/errors"
-	. "github.com/anhntbk08/gateway/internal/app/gateway/jwt"
-	. "github.com/anhntbk08/gateway/internal/app/gateway/store"
-	"github.com/anhntbk08/gateway/internal/app/gateway/store/entity"
+	. "github.com/anhntbk08/gateway/internal/app/tmbridgev2/jwt"
+	. "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store"
+	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
 	. "github.com/anhntbk08/gateway/internal/common"
 	"github.com/tomochain/tomochain/crypto"
 	"golang.org/x/crypto/sha3"
-	// . "github.com/anhntbk08/gateway/internal/app/gateway/store/entity"
+	// . "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
 )
 
 // +kit:endpoint:errorStrategy=auth

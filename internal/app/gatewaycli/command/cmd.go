@@ -17,5 +17,6 @@ func AddCommands(cmd *cobra.Command, c Context) {
 		NewRequestTokenCommand(c),
 		NewLoginCommand(c),
 		NewCreateProjectCommand(c),
+		NewListProjectCommand(c),
 	)
 }

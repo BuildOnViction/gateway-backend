@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/spf13/cobra"
-
 	"github.com/anhntbk08/gateway/internal/app/gatewaycli"
+	"github.com/spf13/cobra"
 )
 
 func main() {

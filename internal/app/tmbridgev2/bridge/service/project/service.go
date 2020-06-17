@@ -5,8 +5,8 @@ import (
 	"errors"
 
 	emperrorErr "emperror.dev/errors"
-	. "github.com/anhntbk08/gateway/internal/app/gateway/store"
-	"github.com/anhntbk08/gateway/internal/app/gateway/store/entity"
+	. "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store"
+	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
 	"github.com/rs/xid"
 	"gopkg.in/mgo.v2/bson"
 )

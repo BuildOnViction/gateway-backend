@@ -8,7 +8,7 @@ import (
 	kitxgrpc "github.com/sagikazarmark/kitx/transport/grpc"
 
 	bridgev1 "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
-	bridgeAuth "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/auth"
+	bridgeAuth "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bridge/service/auth"
 )
 
 // MakeGRPCServer makes a set of endpoints available as a gRPC server.

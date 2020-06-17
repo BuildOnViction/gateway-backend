@@ -12,47 +12,43 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type creatingProjectOptions struct {
+type listingProjectOptions struct {
 	accessToken string
 	name        string
 	authClient  gateway.AuthServiceClient
 	projectCl   gateway.ProjectServiceClient
 }
 
-// NewCreateprojectCommand creates a new cobra.Command for adding a new item to the list.
-func NewCreateProjectCommand(c Context) *cobra.Command {
-	options := creatingProjectOptions{}
+// NewListprojectCommand lists a new cobra.Command for adding a new item to the list.
+func NewListProjectCommand(c Context) *cobra.Command {
+	options := listingProjectOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "create-project",
-		Aliases: []string{"cp"},
-		Short:   "Create Project",
-		Args:    cobra.ExactArgs(2),
+		Use:     "list-project",
+		Aliases: []string{"lp"},
+		Short:   "List Project",
+		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			options.accessToken = args[0]
-			options.name = args[1]
 			options.authClient = c.GetAuthServiceClient()
 			options.projectCl = c.GetProjectServiceClient()
 			cmd.SilenceErrors = true
 			cmd.SilenceUsage = true
 
-			return runCreateProject(options)
+			return runListProject(options)
 		},
 	}
 
 	return cmd
 }
 
-func runCreateProject(options creatingProjectOptions) error {
-	fmt.Println("options.access_token ", options.accessToken)
-	req := &gateway.CreateRequest{
-		Name: options.name,
-	}
+func runListProject(options listingProjectOptions) error {
+	req := &gateway.ListRequest{}
 
 	ctx, cancel := context.WithTimeout(metadata.NewOutgoingContext(context.Background(), metadata.New(map[string]string{"authorization": "Bearer " + options.accessToken})), time.Second*10)
 	defer cancel()
 
-	resp, err := options.projectCl.Create(ctx, req)
+	resp, err := options.projectCl.List(ctx, req)
 	if err != nil {
 		st := status.Convert(err)
 		for _, detail := range st.Details() {
@@ -70,8 +66,7 @@ func runCreateProject(options creatingProjectOptions) error {
 		return err
 	}
 
-	fmt.Println("Create project result: ", resp.Keys)
-	fmt.Println("Create project result: ", resp.Name)
+	fmt.Println("List project result: ", resp.Projects)
 
 	return nil
 }

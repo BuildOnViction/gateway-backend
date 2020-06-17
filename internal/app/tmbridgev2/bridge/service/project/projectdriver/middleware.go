@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	projectService "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/project"
-	entity "github.com/anhntbk08/gateway/internal/app/gateway/store/entity"
+	projectService "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bridge/service/project"
+	entity "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
 )
 
 // Middleware is a service middleware.

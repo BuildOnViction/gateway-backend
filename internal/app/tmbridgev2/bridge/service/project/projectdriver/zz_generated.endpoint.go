@@ -7,8 +7,8 @@ package projectdriver
 import (
 	"context"
 	"errors"
-	"github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/project"
-	entity "github.com/anhntbk08/gateway/internal/app/gateway/store/entity"
+	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/bridge/service/project"
+	entity "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
 	"github.com/go-kit/kit/endpoint"
 	kitxendpoint "github.com/sagikazarmark/kitx/endpoint"
 )
