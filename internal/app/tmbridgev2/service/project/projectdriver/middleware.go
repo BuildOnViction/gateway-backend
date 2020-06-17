@@ -2,7 +2,6 @@ package projectdriver
 
 import (
 	"context"
-	"errors"
 
 	projectService "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/project"
 	entity "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
@@ -79,7 +78,14 @@ func (mw loggingMiddleware) Update(ctx context.Context, project entity.Project) 
 }
 
 func (mw loggingMiddleware) Delete(ctx context.Context, id string) error {
-	return errors.New("NOT_IMPLEMENTED_YET")
+	logger := mw.logger.WithContext(ctx)
+	err := mw.next.Delete(ctx, id)
+
+	if err == nil {
+		logger.Info("Deleted project ", map[string]interface{}{"id": id})
+	}
+
+	return err
 }
 
 // Business metrics

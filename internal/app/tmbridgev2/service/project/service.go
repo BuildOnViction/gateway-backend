@@ -2,6 +2,7 @@ package project
 
 import (
 	"context"
+	"fmt"
 
 	"emperror.dev/errors"
 
@@ -115,7 +116,33 @@ func (s service) Update(ctx context.Context, project entity.Project) (err error)
 }
 
 func (s service) Delete(ctx context.Context, id string) (err error) {
-	return errors.New("Not implemented yet")
+	user := ctx.Value("User").(string)
+	userDao, err := s.checkUserExist(user, "DELETING")
+	if err != nil {
+		return err
+	}
+
+	// check belonging
+	res := &entity.Project{}
+	err = s.db.ProjectDao.GetOne(bson.M{
+		"_id":     bson.ObjectIdHex(id),
+		"user_id": userDao.ID,
+	}, &res)
+
+	if err != nil {
+		return errors.WithStack(common.ValidationError{Violates: map[string][]string{
+			"project": {
+				"PROJECT.DELETING.UNAUTHENTICATED",
+				"Resource unauthenticated",
+			},
+		}})
+	}
+
+	err = s.db.ProjectDao.RemoveItem(bson.M{
+		"_id": bson.ObjectIdHex(id),
+	})
+	fmt.Println("err ", err)
+	return err
 }
 
 func (s service) Statistic(ctx context.Context, id string) (success bool, err error) {

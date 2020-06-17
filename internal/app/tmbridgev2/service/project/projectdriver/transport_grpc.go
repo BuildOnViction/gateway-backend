@@ -39,6 +39,12 @@ func MakeGRPCServer(endpoints Endpoints, jwtkey string, options ...kitgrpc.Serve
 			kitxgrpc.ErrorResponseEncoder(encodeUpdateGRPCResponse, errorEncoder),
 			options...,
 		), errorEncoder),
+		DeleteHandler: kitxgrpc.NewErrorEncoderHandler(kitgrpc.NewServer(
+			VerifyToken(jwtKeyFunc, jwt.SigningMethodHS256, UserClaimFactory)(endpoints.Delete),
+			decodeDeleteGRPCRequest,
+			kitxgrpc.ErrorResponseEncoder(encodeDeleteGRPCResponse, errorEncoder),
+			options...,
+		), errorEncoder),
 	}
 }
 
@@ -114,6 +120,25 @@ func encodeUpdateGRPCResponse(_ context.Context, response interface{}) (interfac
 		success = false
 	}
 	return &bridgev1.UpdateResponse{
+		Success: success,
+	}, resp.Err
+}
+
+func decodeDeleteGRPCRequest(ctx context.Context, request interface{}) (interface{}, error) {
+	req := request.(*bridgev1.DeleteRequest)
+	return DeleteRequest{
+		Id: req.Id,
+	}, nil
+}
+
+func encodeDeleteGRPCResponse(_ context.Context, response interface{}) (interface{}, error) {
+	resp := response.(DeleteResponse)
+
+	success := true
+	if resp.Err != nil {
+		success = false
+	}
+	return &bridgev1.DeleteResponse{
 		Success: success,
 	}, resp.Err
 }
