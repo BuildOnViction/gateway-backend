@@ -28,6 +28,9 @@ type serviceError interface {
 // single parameter.
 type Endpoints struct {
 	Create endpoint.Endpoint
+	Delete endpoint.Endpoint
+	List   endpoint.Endpoint
+	Update endpoint.Endpoint
 }
 
 // MakeEndpoints returns a(n) Endpoints struct where each endpoint invokes
@@ -35,7 +38,12 @@ type Endpoints struct {
 func MakeEndpoints(service project.Service, middleware ...endpoint.Middleware) Endpoints {
 	mw := kitxendpoint.Combine(middleware...)
 
-	return Endpoints{Create: kitxendpoint.OperationNameMiddleware("project.Create")(mw(MakeCreateEndpoint(service)))}
+	return Endpoints{
+		Create: kitxendpoint.OperationNameMiddleware("project.Create")(mw(MakeCreateEndpoint(service))),
+		Delete: kitxendpoint.OperationNameMiddleware("project.Delete")(mw(MakeDeleteEndpoint(service))),
+		List:   kitxendpoint.OperationNameMiddleware("project.List")(mw(MakeListEndpoint(service))),
+		Update: kitxendpoint.OperationNameMiddleware("project.Update")(mw(MakeUpdateEndpoint(service))),
+	}
 }
 
 // CreateRequest is a request struct for Create endpoint.
@@ -75,5 +83,107 @@ func MakeCreateEndpoint(service project.Service) endpoint.Endpoint {
 		}
 
 		return CreateResponse{Project: project}, nil
+	}
+}
+
+// DeleteRequest is a request struct for Delete endpoint.
+type DeleteRequest struct {
+	Id string
+}
+
+// DeleteResponse is a response struct for Delete endpoint.
+type DeleteResponse struct {
+	Err error
+}
+
+func (r DeleteResponse) Failed() error {
+	return r.Err
+}
+
+// MakeDeleteEndpoint returns an endpoint for the matching method of the underlying service.
+func MakeDeleteEndpoint(service project.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(DeleteRequest)
+
+		err := service.Delete(ctx, req.Id)
+
+		if err != nil {
+			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
+				return DeleteResponse{Err: err}, err
+			}
+
+			return DeleteResponse{Err: err}, nil
+		}
+
+		return DeleteResponse{}, nil
+	}
+}
+
+// ListRequest is a request struct for List endpoint.
+type ListRequest struct{}
+
+// ListResponse is a response struct for List endpoint.
+type ListResponse struct {
+	Projects []entity.Project
+	Err      error
+}
+
+func (r ListResponse) Failed() error {
+	return r.Err
+}
+
+// MakeListEndpoint returns an endpoint for the matching method of the underlying service.
+func MakeListEndpoint(service project.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		projects, err := service.List(ctx)
+
+		if err != nil {
+			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
+				return ListResponse{
+					Err:      err,
+					Projects: projects,
+				}, err
+			}
+
+			return ListResponse{
+				Err:      err,
+				Projects: projects,
+			}, nil
+		}
+
+		return ListResponse{Projects: projects}, nil
+	}
+}
+
+// UpdateRequest is a request struct for Update endpoint.
+type UpdateRequest struct {
+	Project entity.Project
+}
+
+// UpdateResponse is a response struct for Update endpoint.
+type UpdateResponse struct {
+	Err error
+}
+
+func (r UpdateResponse) Failed() error {
+	return r.Err
+}
+
+// MakeUpdateEndpoint returns an endpoint for the matching method of the underlying service.
+func MakeUpdateEndpoint(service project.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(UpdateRequest)
+
+		err := service.Update(ctx, req.Project)
+
+		if err != nil {
+			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
+				return UpdateResponse{Err: err}, err
+			}
+
+			return UpdateResponse{Err: err}, nil
+		}
+
+		return UpdateResponse{}, nil
 	}
 }

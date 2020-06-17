@@ -11,6 +11,7 @@ type ProjectServiceKitServer struct {
 	*UnimplementedProjectServiceServer
 
 	CreateHandler kitgrpc.Handler
+	ListHandler   kitgrpc.Handler
 	UpdateHandler kitgrpc.Handler
 	DeleteHandler kitgrpc.Handler
 }
@@ -22,6 +23,14 @@ func (s ProjectServiceKitServer) Create(ctx context.Context, req *CreateRequest)
 	}
 
 	return resp.(*CreateResponse), nil
+}
+func (s ProjectServiceKitServer) List(ctx context.Context, req *ListRequest) (*ListResponse, error) {
+	_, resp, err := s.ListHandler.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.(*ListResponse), nil
 }
 func (s ProjectServiceKitServer) Update(ctx context.Context, req *UpdateRequest) (*UpdateResponse, error) {
 	_, resp, err := s.UpdateHandler.ServeGRPC(ctx, req)

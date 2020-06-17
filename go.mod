@@ -10,23 +10,20 @@ require (
 	emperror.dev/handler/logur v0.4.0
 	github.com/AppsFlyer/go-sundheit v0.2.0
 	github.com/ThreeDotsLabs/watermill v1.1.1
-	github.com/anhntbk08/machinery v1.7.5 // indirect
 	github.com/cloudflare/tableflip v1.2.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/ethereum/go-ethereum v1.9.14
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
+	github.com/go-bdd/gobdd v1.1.0
 	github.com/go-kit/kit v0.10.0
 	github.com/go-sql-driver/mysql v1.4.0
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.4.1
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.4
-	github.com/jnewmano/grpc-json-proxy v0.0.0-20200427184142-6696b5a3ab05
-	github.com/kr/text v0.2.0 // indirect
 	github.com/markbates/pkger v0.15.1
 	github.com/mccutchen/go-httpbin v0.0.0-20190116014521-c5cb2f4802fa
 	github.com/mitchellh/mapstructure v1.2.2 // indirect
-	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/oklog/run v1.1.0
 	github.com/rs/xid v1.2.1
 	github.com/sagikazarmark/appkit v0.9.0
@@ -45,12 +42,11 @@ require (
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 	golang.org/x/tools v0.0.0-20200329025819-fd4102a86c65 // indirect
+	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/genproto v0.0.0-20200507105951-43844f6eee31
 	google.golang.org/grpc v1.29.1
 	google.golang.org/protobuf v1.22.0
-	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
-	gopkg.in/yaml.v2 v2.2.8 // indirect
 	logur.dev/adapter/logrus v0.5.0
 	logur.dev/integration/watermill v0.5.0
 	logur.dev/logur v0.16.2

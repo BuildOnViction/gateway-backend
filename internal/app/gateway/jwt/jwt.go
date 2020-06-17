@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"emperror.dev/errors"
 	jwt "github.com/dgrijalva/jwt-go"
 	. "github.com/go-kit/kit/auth/jwt"
 	"github.com/go-kit/kit/endpoint"
@@ -50,7 +51,12 @@ func VerifyToken(keyFunc jwt.Keyfunc, method jwt.SigningMethod, newClaims Claims
 			// tokenString is stored in the context from the transport handlers.
 			tokenString, ok := ctx.Value(JWTTokenContextKey).(string)
 			if !ok {
-				return nil, ErrTokenContextMissing
+				return nil, errors.WithStack(JWTError{Violates: map[string][]string{
+					"access_token": {
+						"ACCESS_TOKEN.MISSING",
+						ErrTokenContextMissing.Error(),
+					},
+				}})
 			}
 
 			// Parse takes the token string and a function for looking up the
@@ -62,7 +68,12 @@ func VerifyToken(keyFunc jwt.Keyfunc, method jwt.SigningMethod, newClaims Claims
 			token, err := jwt.ParseWithClaims(tokenString, newClaims(), func(token *jwt.Token) (interface{}, error) {
 				// Don't forget to validate the alg is what you expect:
 				if token.Method != method {
-					return nil, ErrUnexpectedSigningMethod
+					return nil, errors.WithStack(JWTError{Violates: map[string][]string{
+						"access_token": {
+							"ACCESS_TOKEN.UNEXPECTED_SIGNING_METHOD",
+							ErrUnexpectedSigningMethod.Error(),
+						},
+					}})
 				}
 
 				return keyFunc(token)
@@ -72,13 +83,28 @@ func VerifyToken(keyFunc jwt.Keyfunc, method jwt.SigningMethod, newClaims Claims
 					switch {
 					case e.Errors&jwt.ValidationErrorMalformed != 0:
 						// Token is malformed
-						return nil, ErrTokenMalformed
+						return nil, errors.WithStack(JWTError{Violates: map[string][]string{
+							"access_token": {
+								"ACCESS_TOKEN.MALFORMED",
+								ErrTokenMalformed.Error(),
+							},
+						}})
 					case e.Errors&jwt.ValidationErrorExpired != 0:
 						// Token is expired
-						return nil, ErrTokenExpired
+						return nil, errors.WithStack(JWTError{Violates: map[string][]string{
+							"access_token": {
+								"ACCESS_TOKEN.EXPIRED",
+								ErrTokenExpired.Error(),
+							},
+						}})
 					case e.Errors&jwt.ValidationErrorNotValidYet != 0:
 						// Token is not active yet
-						return nil, ErrTokenNotActive
+						return nil, errors.WithStack(JWTError{Violates: map[string][]string{
+							"access_token": {
+								"ACCESS_TOKEN.INACTIVE",
+								ErrTokenNotActive.Error(),
+							},
+						}})
 					case e.Inner != nil:
 						// report e.Inner
 						return nil, e.Inner
@@ -90,12 +116,22 @@ func VerifyToken(keyFunc jwt.Keyfunc, method jwt.SigningMethod, newClaims Claims
 			}
 
 			if !token.Valid {
-				return nil, ErrTokenInvalid
+				return nil, errors.WithStack(JWTError{Violates: map[string][]string{
+					"access_token": {
+						"ACCESS_TOKEN.INVALID",
+						ErrTokenInvalid.Error(),
+					},
+				}})
 			}
 
 			claims, ok := token.Claims.(*UserClaims)
 			if !ok {
-				return nil, ErrTokenInvalid
+				return nil, errors.WithStack(JWTError{Violates: map[string][]string{
+					"access_token": {
+						"ACCESS_TOKEN.INVALID",
+						ErrTokenInvalid.Error(),
+					},
+				}})
 			}
 
 			ctx = context.WithValue(ctx, "User", claims.Address)

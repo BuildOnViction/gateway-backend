@@ -13,8 +13,8 @@ type Keys struct {
 }
 
 type Security struct {
-	WhileListNamees  []string `json:"while_list_addresses" bson:"while_list_addresses"`
-	WhileListOrigins []string `json:"while_list_origins" bson:"while_list_origins"`
+	WhileListAddresses []string `json:"while_list_addresses" bson:"while_list_addresses"`
+	WhileListOrigins   []string `json:"while_list_origins" bson:"while_list_origins"`
 }
 
 // Project
@@ -37,6 +37,7 @@ type ProjectRecordUpdate struct {
 // GetBSON insert record database
 func (csi *Project) GetBSON() (interface{}, error) {
 	d := Project{
+		ID:        bson.NewObjectId(),
 		User:      csi.User,
 		Name:      csi.Name,
 		Keys:      csi.Keys,

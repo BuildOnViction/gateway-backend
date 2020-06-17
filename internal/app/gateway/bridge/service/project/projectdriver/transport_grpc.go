@@ -25,6 +25,12 @@ func MakeGRPCServer(endpoints Endpoints, jwtkey string, options ...kitgrpc.Serve
 			kitxgrpc.ErrorResponseEncoder(encodeCreateGRPCResponse, errorEncoder),
 			options...,
 		), errorEncoder),
+		ListHandler: kitxgrpc.NewErrorEncoderHandler(kitgrpc.NewServer(
+			VerifyToken(jwtKeyFunc, jwt.SigningMethodHS256, UserClaimFactory)(endpoints.List),
+			decodeListGRPCRequest,
+			kitxgrpc.ErrorResponseEncoder(encodeListGRPCResponse, errorEncoder),
+			options...,
+		), errorEncoder),
 	}
 }
 
@@ -40,11 +46,43 @@ func encodeCreateGRPCResponse(_ context.Context, response interface{}) (interfac
 	resp := response.(CreateResponse)
 
 	return &bridgev1.CreateResponse{
-		Id: resp.Project.ID.String(),
+		Id:   resp.Project.ID.String(),
+		User: resp.Project.User.Hex(),
 		Keys: &bridgev1.Keys{
 			Id:     resp.Project.Keys.ID,
 			Secret: resp.Project.Keys.Secret,
 		},
 		Name: resp.Project.Name,
 	}, nil
+}
+
+func decodeListGRPCRequest(ctx context.Context, request interface{}) (interface{}, error) {
+	return ListRequest{}, nil
+}
+
+func encodeListGRPCResponse(_ context.Context, response interface{}) (interface{}, error) {
+	resp := response.(ListResponse)
+
+	projects := make([]*bridgev1.Project, len(resp.Projects))
+
+	for i, t := range resp.Projects {
+		projects[i] = &bridgev1.Project{
+			Id:   t.ID.String(),
+			Name: t.Name,
+			User: t.User.Hex(),
+			Keys: &bridgev1.Keys{
+				Id:     t.Keys.ID,
+				Secret: t.Keys.Secret,
+			},
+			Addresses: &bridgev1.Addresses{},
+			Security: &bridgev1.Security{
+				WhiteListDomains: t.Security.WhileListAddresses,
+				WhiteListIps:     t.Security.WhileListOrigins,
+			},
+		}
+	}
+
+	return &bridgev1.ListResponse{
+		Projects: projects,
+	}, resp.Err
 }

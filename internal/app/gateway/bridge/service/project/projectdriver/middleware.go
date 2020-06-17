@@ -3,6 +3,7 @@ package projectdriver
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	projectService "github.com/anhntbk08/gateway/internal/app/gateway/bridge/service/project"
 	entity "github.com/anhntbk08/gateway/internal/app/gateway/store/entity"
@@ -19,9 +20,16 @@ type defaultMiddleware struct {
 func (m defaultMiddleware) Create(ctx context.Context, name string) (entity.Project, error) {
 	return m.service.Create(ctx, name)
 }
+func (m defaultMiddleware) List(ctx context.Context) ([]entity.Project, error) {
+	return m.service.List(ctx)
+}
 
-func (m defaultMiddleware) Delete(ctx context.Context, id string) (bool, error) {
-	return false, errors.New("NOT_IMPLEMENTED_YET")
+func (m defaultMiddleware) Update(ctx context.Context, project entity.Project) error {
+	return m.service.Update(ctx, project)
+}
+
+func (m defaultMiddleware) Delete(ctx context.Context, projectID string) error {
+	return m.service.Delete(ctx, projectID)
 }
 
 // LoggingMiddleware is a service level logging middleware.
@@ -40,22 +48,40 @@ type loggingMiddleware struct {
 }
 
 func (mw loggingMiddleware) Create(ctx context.Context, name string) (entity.Project, error) {
-	// logger := mw.logger.WithContext(ctx)
-
-	// logger.Info(request.Address + " trying to create project ")
-
+	fmt.Println("user ", ctx.Value("User"))
+	logger := mw.logger.WithContext(ctx)
 	resp, err := mw.next.Create(ctx, name)
 	if err != nil {
 		return entity.Project{}, err
 	}
 
-	// logger.Info("Logged in", map[string]interface{}{"address": request.Address})
+	logger.Info("Created project ", map[string]interface{}{"name": resp.Name, "id": resp.Keys.ID})
 
 	return resp, err
 }
 
-func (mw loggingMiddleware) Delete(ctx context.Context, id string) (bool, error) {
-	return false, errors.New("NOT_IMPLEMENTED_YET")
+func (mw loggingMiddleware) List(ctx context.Context) ([]entity.Project, error) {
+	fmt.Println("user ", ctx.Value("User"))
+	resp, err := mw.next.List(ctx)
+	if err != nil {
+		return []entity.Project{}, err
+	}
+
+	return resp, err
+}
+
+func (mw loggingMiddleware) Update(ctx context.Context, project entity.Project) error {
+	logger := mw.logger.WithContext(ctx)
+	fmt.Println("user ", ctx.Value("User"))
+	err := mw.next.Update(ctx, project)
+
+	logger.Info("Updated project ", map[string]interface{}{"name": project.Name, "id": project.ID})
+
+	return err
+}
+
+func (mw loggingMiddleware) Delete(ctx context.Context, id string) error {
+	return errors.New("NOT_IMPLEMENTED_YET")
 }
 
 // Business metrics
