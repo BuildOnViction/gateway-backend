@@ -2,11 +2,13 @@ package project
 
 import (
 	"context"
-	"errors"
+
+	"emperror.dev/errors"
 
 	emperrorErr "emperror.dev/errors"
 	. "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store"
 	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
+	common "github.com/anhntbk08/gateway/internal/common"
 	"github.com/rs/xid"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -31,12 +33,25 @@ func NewService(db *Mongo) Service {
 	}
 }
 
-func (s service) Create(ctx context.Context, name string) (entity.Project, error) {
-	user := ctx.Value("User").(string)
-
+func (s service) checkUserExist(user string, action string) (*entity.User, error) {
 	userDao, err := s.db.UserDao.IsExist(user)
 	if err != nil {
-		return entity.Project{}, emperrorErr.WithStack(errors.New("User not exists"))
+		return userDao, errors.WithStack(common.ValidationError{Violates: map[string][]string{
+			"project": {
+				"PROJECT." + action + ".NOT_EXIST",
+				"User not exist",
+			},
+		}})
+	}
+
+	return userDao, err
+}
+
+func (s service) Create(ctx context.Context, name string) (entity.Project, error) {
+	user := ctx.Value("User").(string)
+	userDao, err := s.checkUserExist(user, "CREATING")
+	if err != nil {
+		return entity.Project{}, err
 	}
 
 	project := entity.Project{
@@ -55,20 +70,48 @@ func (s service) Create(ctx context.Context, name string) (entity.Project, error
 
 func (s service) List(ctx context.Context) ([]entity.Project, error) {
 	user := ctx.Value("User").(string)
-
-	_, err := s.db.UserDao.IsExist(user)
+	userDao, err := s.checkUserExist(user, "LISTING")
 	if err != nil {
-		return []entity.Project{}, emperrorErr.WithStack(errors.New("User not exists"))
+		return []entity.Project{}, err
 	}
 
 	projects := []entity.Project{}
-	err = s.db.ProjectDao.Get(bson.M{}, 0, 100, &projects)
+	err = s.db.ProjectDao.Get(bson.M{
+		"user_id": userDao.ID,
+	}, 0, 100, &projects)
 
 	return projects, emperrorErr.WithStack(err)
 }
 
 func (s service) Update(ctx context.Context, project entity.Project) (err error) {
-	return errors.New("Not implemented yet")
+	user := ctx.Value("User").(string)
+	userDao, err := s.checkUserExist(user, "UPDATING")
+	if err != nil {
+		return err
+	}
+
+	// check belonging
+	res := &entity.Project{}
+	err = s.db.ProjectDao.GetOne(bson.M{
+		"_id":     project.ID,
+		"user_id": userDao.ID,
+	}, &res)
+
+	if err != nil {
+		return errors.WithStack(common.ValidationError{Violates: map[string][]string{
+			"project": {
+				"PROJECT.UPDATING.UNAUTHENTICATED",
+				"Resource unauthenticated",
+			},
+		}})
+	}
+
+	project.User = userDao.ID
+	err = s.db.ProjectDao.Update(bson.M{
+		"_id": project.ID,
+	}, project)
+
+	return err
 }
 
 func (s service) Delete(ctx context.Context, id string) (err error) {

@@ -3,7 +3,6 @@ package projectdriver
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	projectService "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/project"
 	entity "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
@@ -48,7 +47,6 @@ type loggingMiddleware struct {
 }
 
 func (mw loggingMiddleware) Create(ctx context.Context, name string) (entity.Project, error) {
-	fmt.Println("user ", ctx.Value("User"))
 	logger := mw.logger.WithContext(ctx)
 	resp, err := mw.next.Create(ctx, name)
 	if err != nil {
@@ -61,7 +59,6 @@ func (mw loggingMiddleware) Create(ctx context.Context, name string) (entity.Pro
 }
 
 func (mw loggingMiddleware) List(ctx context.Context) ([]entity.Project, error) {
-	fmt.Println("user ", ctx.Value("User"))
 	resp, err := mw.next.List(ctx)
 	if err != nil {
 		return []entity.Project{}, err
@@ -72,10 +69,11 @@ func (mw loggingMiddleware) List(ctx context.Context) ([]entity.Project, error) 
 
 func (mw loggingMiddleware) Update(ctx context.Context, project entity.Project) error {
 	logger := mw.logger.WithContext(ctx)
-	fmt.Println("user ", ctx.Value("User"))
 	err := mw.next.Update(ctx, project)
 
-	logger.Info("Updated project ", map[string]interface{}{"name": project.Name, "id": project.ID})
+	if err == nil {
+		logger.Info("Updated project ", map[string]interface{}{"name": project.Name, "id": project.ID})
+	}
 
 	return err
 }

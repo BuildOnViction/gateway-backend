@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	gateway "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
@@ -12,42 +13,54 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type listingProjectOptions struct {
+type updatingProjectOptions struct {
 	accessToken string
+	projectID   string
+	field       string
+	value       string
 	authClient  gateway.AuthServiceClient
 	projectCl   gateway.ProjectServiceClient
 }
 
-// NewListprojectCommand lists a new cobra.Command for adding a new item to the list.
-func NewListProjectCommand(c Context) *cobra.Command {
-	options := listingProjectOptions{}
+// NewUpdateprojectCommand updates a new cobra.Command for adding a new item to the update.
+func NewUpdateProjectCommand(c Context) *cobra.Command {
+	options := updatingProjectOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "list-project",
-		Aliases: []string{"lp"},
-		Short:   "List Project",
-		Args:    cobra.ExactArgs(1),
+		Use:     "update-project",
+		Aliases: []string{"up"},
+		Short:   "Update Project",
+		Args:    cobra.ExactArgs(4),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			options.accessToken = args[0]
+			options.projectID = args[1]
+			options.field = args[2]
+			options.value = args[3]
 			options.authClient = c.GetAuthServiceClient()
 			options.projectCl = c.GetProjectServiceClient()
 			cmd.SilenceErrors = true
 			cmd.SilenceUsage = true
 
-			return runListProject(options)
+			return runUpdateProject(options)
 		},
 	}
 
 	return cmd
 }
 
-func runListProject(options listingProjectOptions) error {
-	req := &gateway.ListRequest{}
+func runUpdateProject(options updatingProjectOptions) error {
+	req := gateway.UpdateRequest{
+		Id: options.projectID,
+	}
+
+	if strings.ToLower(options.field) == "name" {
+		req.Name = options.value
+	}
 
 	ctx, cancel := context.WithTimeout(metadata.NewOutgoingContext(context.Background(), metadata.New(map[string]string{"authorization": "Bearer " + options.accessToken})), time.Second*10)
 	defer cancel()
 
-	resp, err := options.projectCl.List(ctx, req)
+	resp, err := options.projectCl.Update(ctx, &req)
 	if err != nil {
 		st := status.Convert(err)
 		for _, detail := range st.Details() {
@@ -65,7 +78,7 @@ func runListProject(options listingProjectOptions) error {
 		return err
 	}
 
-	fmt.Println("List project result: ", resp.Projects)
+	fmt.Println("Update project result: ", resp.Success)
 
 	return nil
 }
