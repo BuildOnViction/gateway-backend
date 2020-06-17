@@ -22,11 +22,11 @@ import (
 
 	// TODO find way to merge all small services part into 1 sub-service with driver, store adaptor ...
 	gatewayv1 "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
-	bridgeAuth "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bridge/service/auth"
-	bridgeAuthDriver "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bridge/service/auth/authdriver"
+	bridgeAuth "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/auth"
+	bridgeAuthDriver "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/auth/authdriver"
 
-	project "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bridge/service/project"
-	projectDriver "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bridge/service/project/projectdriver"
+	project "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/project"
+	projectDriver "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/project/projectdriver"
 
 	store "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store"
 	"github.com/anhntbk08/gateway/internal/common"

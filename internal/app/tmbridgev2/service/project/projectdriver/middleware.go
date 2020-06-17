@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	projectService "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bridge/service/project"
+	projectService "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/project"
 	entity "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
 )
 

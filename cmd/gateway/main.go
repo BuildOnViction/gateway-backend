@@ -20,9 +20,9 @@ import (
 	health "github.com/AppsFlyer/go-sundheit"
 	healthhttp "github.com/AppsFlyer/go-sundheit/http"
 	gateway "github.com/anhntbk08/gateway/internal/app/tmbridgev2"
-	authDriver "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bridge/service/auth/authdriver"
+	authDriver "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/auth/authdriver"
 
-	// projectDriver "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bridge/service/project/projectdriver"
+	// projectDriver "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/project/projectdriver"
 
 	"github.com/anhntbk08/gateway/internal/common/commonadapter"
 	"github.com/anhntbk08/gateway/internal/platform/appkit"

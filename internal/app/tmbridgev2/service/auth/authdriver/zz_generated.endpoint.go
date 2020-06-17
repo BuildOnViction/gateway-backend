@@ -7,7 +7,7 @@ package authdriver
 import (
 	"context"
 	"errors"
-	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/bridge/service/auth"
+	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/auth"
 	"github.com/go-kit/kit/endpoint"
 	kitxendpoint "github.com/sagikazarmark/kitx/endpoint"
 )
