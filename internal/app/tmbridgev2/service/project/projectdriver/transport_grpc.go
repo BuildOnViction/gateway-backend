@@ -3,9 +3,11 @@ package projectdriver
 import (
 	"context"
 
+	"emperror.dev/errors"
 	bridgev1 "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
 	. "github.com/anhntbk08/gateway/internal/app/tmbridgev2/jwt"
 	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
+	"github.com/anhntbk08/gateway/internal/common"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/globalsign/mgo/bson"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
@@ -104,12 +106,21 @@ func encodeListGRPCResponse(_ context.Context, response interface{}) (interface{
 func decodeUpdateGRPCRequest(ctx context.Context, request interface{}) (interface{}, error) {
 	req := request.(*bridgev1.UpdateRequest)
 
-	return UpdateRequest{
-		Project: entity.Project{
-			ID:   bson.ObjectIdHex(req.Id),
-			Name: req.Name,
-		},
-	}, nil
+	if common.IsValidMongoID(req.Id) {
+		return UpdateRequest{
+			Project: entity.Project{
+				ID:   bson.ObjectIdHex(req.Id),
+				Name: req.Name,
+			},
+		}, nil
+	} else {
+		return UpdateRequest{}, errors.WithStack(common.ValidationError{Violates: map[string][]string{
+			"project": {
+				"PROJECT.UPDATING.MALFORMED_PROJECT_ID",
+				"Malformed project id",
+			},
+		}})
+	}
 }
 
 func encodeUpdateGRPCResponse(_ context.Context, response interface{}) (interface{}, error) {
@@ -126,9 +137,18 @@ func encodeUpdateGRPCResponse(_ context.Context, response interface{}) (interfac
 
 func decodeDeleteGRPCRequest(ctx context.Context, request interface{}) (interface{}, error) {
 	req := request.(*bridgev1.DeleteRequest)
-	return DeleteRequest{
-		Id: req.Id,
-	}, nil
+	if common.IsValidMongoID(req.Id) {
+		return DeleteRequest{
+			Id: bson.ObjectIdHex(req.Id),
+		}, nil
+	} else {
+		return DeleteRequest{}, errors.WithStack(common.ValidationError{Violates: map[string][]string{
+			"project": {
+				"PROJECT.DELETING.MALFORMED_PROJECT_ID",
+				"Malformed project id",
+			},
+		}})
+	}
 }
 
 func encodeDeleteGRPCResponse(_ context.Context, response interface{}) (interface{}, error) {

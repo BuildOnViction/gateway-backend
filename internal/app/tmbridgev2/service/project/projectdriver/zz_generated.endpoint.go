@@ -9,6 +9,7 @@ import (
 	"errors"
 	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/project"
 	entity "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
+	bson "github.com/globalsign/mgo/bson"
 	"github.com/go-kit/kit/endpoint"
 	kitxendpoint "github.com/sagikazarmark/kitx/endpoint"
 )
@@ -88,7 +89,7 @@ func MakeCreateEndpoint(service project.Service) endpoint.Endpoint {
 
 // DeleteRequest is a request struct for Delete endpoint.
 type DeleteRequest struct {
-	Id string
+	Id bson.ObjectId
 }
 
 // DeleteResponse is a response struct for Delete endpoint.

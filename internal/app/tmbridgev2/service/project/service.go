@@ -10,8 +10,8 @@ import (
 	. "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store"
 	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
 	common "github.com/anhntbk08/gateway/internal/common"
+	"github.com/globalsign/mgo/bson"
 	"github.com/rs/xid"
-	"gopkg.in/mgo.v2/bson"
 )
 
 // +kit:endpoint:errorStrategy=project
@@ -20,7 +20,7 @@ type Service interface {
 	Create(ctx context.Context, name string) (project entity.Project, err error)
 	List(ctx context.Context) (projects []entity.Project, err error)
 	Update(ctx context.Context, project entity.Project) (err error)
-	Delete(ctx context.Context, id string) (err error)
+	Delete(ctx context.Context, id bson.ObjectId) (err error)
 	// Statistic(ctx context.Context, id string) (success bool, err error)
 }
 
@@ -115,7 +115,7 @@ func (s service) Update(ctx context.Context, project entity.Project) (err error)
 	return err
 }
 
-func (s service) Delete(ctx context.Context, id string) (err error) {
+func (s service) Delete(ctx context.Context, id bson.ObjectId) (err error) {
 	user := ctx.Value("User").(string)
 	userDao, err := s.checkUserExist(user, "DELETING")
 	if err != nil {
@@ -125,7 +125,7 @@ func (s service) Delete(ctx context.Context, id string) (err error) {
 	// check belonging
 	res := &entity.Project{}
 	err = s.db.ProjectDao.GetOne(bson.M{
-		"_id":     bson.ObjectIdHex(id),
+		"_id":     id,
 		"user_id": userDao.ID,
 	}, &res)
 
@@ -139,7 +139,7 @@ func (s service) Delete(ctx context.Context, id string) (err error) {
 	}
 
 	err = s.db.ProjectDao.RemoveItem(bson.M{
-		"_id": bson.ObjectIdHex(id),
+		"_id": id,
 	})
 	fmt.Println("err ", err)
 	return err

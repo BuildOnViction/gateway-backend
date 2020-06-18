@@ -1,6 +1,8 @@
 package gateway
 
 import (
+	"encoding/hex"
+
 	"github.com/anhntbk08/gateway/internal/common"
 )
 
@@ -12,3 +14,16 @@ type Logger = common.Logger
 
 // ErrorHandler handles an error.
 type ErrorHandler = common.ErrorHandler
+
+func IsValidMongoID(id string) bool {
+	idByte, err := hex.DecodeString(id)
+	if err != nil {
+		return false
+	}
+
+	if len(idByte) != 12 {
+		return false
+	}
+
+	return true
+}

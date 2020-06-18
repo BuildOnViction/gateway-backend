@@ -5,6 +5,7 @@ import (
 
 	projectService "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/project"
 	entity "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
+	"github.com/globalsign/mgo/bson"
 )
 
 // Middleware is a service middleware.
@@ -26,7 +27,7 @@ func (m defaultMiddleware) Update(ctx context.Context, project entity.Project) e
 	return m.service.Update(ctx, project)
 }
 
-func (m defaultMiddleware) Delete(ctx context.Context, projectID string) error {
+func (m defaultMiddleware) Delete(ctx context.Context, projectID bson.ObjectId) error {
 	return m.service.Delete(ctx, projectID)
 }
 
@@ -77,7 +78,7 @@ func (mw loggingMiddleware) Update(ctx context.Context, project entity.Project) 
 	return err
 }
 
-func (mw loggingMiddleware) Delete(ctx context.Context, id string) error {
+func (mw loggingMiddleware) Delete(ctx context.Context, id bson.ObjectId) error {
 	logger := mw.logger.WithContext(ctx)
 	err := mw.next.Delete(ctx, id)
 
