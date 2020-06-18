@@ -13,8 +13,8 @@ type Keys struct {
 }
 
 type Security struct {
-	WhileListAddresses []string `json:"while_list_addresses" bson:"while_list_addresses"`
-	WhileListOrigins   []string `json:"while_list_origins" bson:"while_list_origins"`
+	WhileListDomains []string `json:"while_list_domains" bson:"while_list_domains"`
+	WhileListIps     []string `json:"while_list_ips" bson:"while_list_ips"`
 }
 
 type Addresses struct {
@@ -22,17 +22,23 @@ type Addresses struct {
 	WatchSmartContracts []string `json:"watch_smart_contracts" bson:"watch_smart_contracts"`
 }
 
+type Notification struct {
+	WebHook string   `json:"web_hook" bson:"web_hook"`
+	Emails  []string `json:"emails" bson:"emails"`
+}
+
 // Project
 type Project struct {
-	ID        bson.ObjectId `json:"id" bson:"_id"`
-	Name      string        `json:"name" bson:"name"`
-	Keys      Keys          `json:"keys" bson:"keys"`
-	Addresses Addresses     `json:"addresses" bson:"addresses"`
-	Security  Security      `json:"security" bson:"security"`
-	User      bson.ObjectId `json:"user_id" bson:"user_id"`
-	Status    bool          `json:"status" bson:"status"`
-	CreatedAt time.Time     `json:"createdAt" bson:"createdAt"`
-	UpdatedAt time.Time     `json:"updatedAt" bson:"updatedAt"`
+	ID           bson.ObjectId `json:"id" bson:"_id"`
+	Name         string        `json:"name" bson:"name"`
+	Keys         Keys          `json:"keys" bson:"keys"`
+	Addresses    Addresses     `json:"addresses" bson:"addresses"`
+	Security     Security      `json:"security" bson:"security"`
+	User         bson.ObjectId `json:"user_id" bson:"user_id"`
+	Notification Notification  `json:"notification" bson:"notification"`
+	Status       bool          `json:"status" bson:"status"`
+	CreatedAt    time.Time     `json:"createdAt" bson:"createdAt"`
+	UpdatedAt    time.Time     `json:"updatedAt" bson:"updatedAt"`
 }
 
 // ProjectRecordUpdate
@@ -43,14 +49,16 @@ type ProjectRecordUpdate struct {
 // GetBSON insert record database
 func (csi *Project) GetBSON() (interface{}, error) {
 	d := Project{
-		ID:        bson.NewObjectId(),
-		User:      csi.User,
-		Name:      csi.Name,
-		Keys:      csi.Keys,
-		Security:  csi.Security,
-		Status:    csi.Status,
-		CreatedAt: csi.CreatedAt,
-		UpdatedAt: csi.UpdatedAt,
+		ID:           bson.NewObjectId(),
+		User:         csi.User,
+		Name:         csi.Name,
+		Keys:         csi.Keys,
+		Security:     csi.Security,
+		Addresses:    csi.Addresses,
+		Notification: csi.Notification,
+		Status:       csi.Status,
+		CreatedAt:    csi.CreatedAt,
+		UpdatedAt:    csi.UpdatedAt,
 	}
 	return d, nil
 }
@@ -59,12 +67,14 @@ func (csi *Project) GetBSON() (interface{}, error) {
 func (csip ProjectRecordUpdate) GetBSON() (interface{}, error) {
 	now := time.Now()
 	set := bson.M{
-		"name":      csip.Name,
-		"user":      csip.User,
-		"keys":      csip.Keys,
-		"security":  csip.Security,
-		"status":    csip.Status,
-		"updatedAt": now,
+		"name":         csip.Name,
+		"user":         csip.User,
+		"keys":         csip.Keys,
+		"security":     csip.Security,
+		"status":       csip.Status,
+		"addresses":    csip.Addresses,
+		"notification": csip.Notification,
+		"updatedAt":    now,
 	}
 	setOnInsert := bson.M{
 		"_id":       bson.NewObjectId(),

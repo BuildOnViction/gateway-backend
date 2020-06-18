@@ -90,10 +90,17 @@ func encodeListGRPCResponse(_ context.Context, response interface{}) (interface{
 				Id:     t.Keys.ID,
 				Secret: t.Keys.Secret,
 			},
-			Addresses: &gateway.Addresses{},
+			Addresses: &gateway.Addresses{
+				MintingAddress:      t.Addresses.MintingAddress,
+				WatchSmartContracts: t.Addresses.WatchSmartContracts,
+			},
 			Security: &gateway.Security{
-				WhiteListDomains: t.Security.WhileListAddresses,
-				WhiteListIps:     t.Security.WhileListOrigins,
+				WhiteListDomains: t.Security.WhileListDomains,
+				WhiteListIps:     t.Security.WhileListIps,
+			},
+			Notification: &gateway.Notification{
+				WebHook: t.Notification.WebHook,
+				Emails:  t.Notification.Emails,
 			},
 		}
 	}
@@ -106,11 +113,39 @@ func encodeListGRPCResponse(_ context.Context, response interface{}) (interface{
 func decodeUpdateGRPCRequest(ctx context.Context, request interface{}) (interface{}, error) {
 	req := request.(*gateway.UpdateRequest)
 
+	addresses := entity.Addresses{}
+	if req.Addresses != nil {
+		addresses = entity.Addresses{
+			MintingAddress:      req.Addresses.MintingAddress,
+			WatchSmartContracts: req.Addresses.WatchSmartContracts,
+		}
+	}
+
+	notification := entity.Notification{}
+	if req.Notification != nil {
+		notification = entity.Notification{
+			WebHook: req.Notification.WebHook,
+			Emails:  req.Notification.Emails,
+		}
+	}
+
+	security := entity.Security{}
+	if req.Security != nil {
+		security = entity.Security{
+			WhileListDomains: req.Security.WhiteListDomains,
+			WhileListIps:     req.Security.WhiteListIps,
+		}
+	}
+
 	if common.IsValidMongoID(req.Id) {
 		return UpdateRequest{
 			Project: entity.Project{
-				ID:   bson.ObjectIdHex(req.Id),
-				Name: req.Name,
+				ID:           bson.ObjectIdHex(req.Id),
+				Name:         req.Name,
+				Addresses:    addresses,
+				Notification: notification,
+				Security:     security,
+				Status:       req.Status,
 			},
 		}, nil
 	} else {

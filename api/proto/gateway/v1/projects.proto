@@ -35,7 +35,7 @@ message Addresses {
 
 message Notification {
 	string web_hook = 1;
-	string emails = 2;
+	repeated string emails = 2;
 }
 
 message CreateResponse {
@@ -57,6 +57,8 @@ message UpdateRequest {
 	string name = 2;
 	Addresses addresses = 3;
 	Security security = 4;
+	Notification notification = 5;
+	bool status = 6;
 }
 
 message UpdateResponse {
