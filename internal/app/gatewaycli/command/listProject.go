@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	gateway "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
+	gateway "github.com/anhntbk08/gateway/.gen/api/proto/gateway/v1"
 	"github.com/spf13/cobra"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/metadata"

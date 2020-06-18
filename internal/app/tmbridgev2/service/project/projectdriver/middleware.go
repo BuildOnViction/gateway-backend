@@ -89,30 +89,6 @@ func (mw loggingMiddleware) Delete(ctx context.Context, id bson.ObjectId) error 
 	return err
 }
 
-// Business metrics
-// nolint: gochecknoglobals,lll
-// var (
-// 	CreatedTodoItemCount  = stats.Int64("created_todo_item_count", "Number of todo items created", stats.UnitDimensionless)
-// 	CompleteTodoItemCount = stats.Int64("complete_todo_item_count", "Number of todo items marked complete", stats.UnitDimensionless)
-// )
-
-// // nolint: gochecknoglobals
-// var (
-// 	CreatedTodoItemCountView = &view.View{
-// 		Name:        "todo_item_created_count",
-// 		Description: "Count of todo items created",
-// 		Measure:     CreatedTodoItemCount,
-// 		Aggregation: view.Count(),
-// 	}
-
-// 	CompleteTodoItemCountView = &view.View{
-// 		Name:        "todo_item_complete_count",
-// 		Description: "Count of todo items complete",
-// 		Measure:     CompleteTodoItemCount,
-// 		Aggregation: view.Count(),
-// 	}
-// )
-
 // InstrumentationMiddleware is a service level instrumentation middleware.
 func InstrumentationMiddleware() Middleware {
 	return func(next projectService.Service) projectService.Service {

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"emperror.dev/errors"
-	bridgev1 "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
+	gateway "github.com/anhntbk08/gateway/.gen/api/proto/gateway/v1"
 	. "github.com/anhntbk08/gateway/internal/app/tmbridgev2/jwt"
 	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
 	"github.com/anhntbk08/gateway/internal/common"
@@ -16,13 +16,13 @@ import (
 )
 
 // MakeGRPCServer makes a set of endpoints available as a gRPC server.
-func MakeGRPCServer(endpoints Endpoints, jwtkey string, options ...kitgrpc.ServerOption) bridgev1.ProjectServiceKitServer {
+func MakeGRPCServer(endpoints Endpoints, jwtkey string, options ...kitgrpc.ServerOption) gateway.ProjectServiceKitServer {
 	errorEncoder := kitxgrpc.NewStatusErrorResponseEncoder(appkitgrpc.NewDefaultStatusConverter())
 	jwtKeyFunc := func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtkey), nil
 	}
 
-	return bridgev1.ProjectServiceKitServer{
+	return gateway.ProjectServiceKitServer{
 		CreateHandler: kitxgrpc.NewErrorEncoderHandler(kitgrpc.NewServer(
 			VerifyToken(jwtKeyFunc, jwt.SigningMethodHS256, UserClaimFactory)(endpoints.Create),
 			decodeCreateGRPCRequest,
@@ -51,7 +51,7 @@ func MakeGRPCServer(endpoints Endpoints, jwtkey string, options ...kitgrpc.Serve
 }
 
 func decodeCreateGRPCRequest(ctx context.Context, request interface{}) (interface{}, error) {
-	req := request.(*bridgev1.CreateRequest)
+	req := request.(*gateway.CreateRequest)
 
 	return CreateRequest{
 		Name: req.Name,
@@ -61,10 +61,10 @@ func decodeCreateGRPCRequest(ctx context.Context, request interface{}) (interfac
 func encodeCreateGRPCResponse(_ context.Context, response interface{}) (interface{}, error) {
 	resp := response.(CreateResponse)
 
-	return &bridgev1.CreateResponse{
+	return &gateway.CreateResponse{
 		Id:   resp.Project.ID.String(),
 		User: resp.Project.User.Hex(),
-		Keys: &bridgev1.Keys{
+		Keys: &gateway.Keys{
 			Id:     resp.Project.Keys.ID,
 			Secret: resp.Project.Keys.Secret,
 		},
@@ -79,32 +79,32 @@ func decodeListGRPCRequest(ctx context.Context, request interface{}) (interface{
 func encodeListGRPCResponse(_ context.Context, response interface{}) (interface{}, error) {
 	resp := response.(ListResponse)
 
-	projects := make([]*bridgev1.Project, len(resp.Projects))
+	projects := make([]*gateway.Project, len(resp.Projects))
 
 	for i, t := range resp.Projects {
-		projects[i] = &bridgev1.Project{
+		projects[i] = &gateway.Project{
 			Id:   t.ID.String(),
 			Name: t.Name,
 			User: t.User.Hex(),
-			Keys: &bridgev1.Keys{
+			Keys: &gateway.Keys{
 				Id:     t.Keys.ID,
 				Secret: t.Keys.Secret,
 			},
-			Addresses: &bridgev1.Addresses{},
-			Security: &bridgev1.Security{
+			Addresses: &gateway.Addresses{},
+			Security: &gateway.Security{
 				WhiteListDomains: t.Security.WhileListAddresses,
 				WhiteListIps:     t.Security.WhileListOrigins,
 			},
 		}
 	}
 
-	return &bridgev1.ListResponse{
+	return &gateway.ListResponse{
 		Projects: projects,
 	}, resp.Err
 }
 
 func decodeUpdateGRPCRequest(ctx context.Context, request interface{}) (interface{}, error) {
-	req := request.(*bridgev1.UpdateRequest)
+	req := request.(*gateway.UpdateRequest)
 
 	if common.IsValidMongoID(req.Id) {
 		return UpdateRequest{
@@ -130,13 +130,13 @@ func encodeUpdateGRPCResponse(_ context.Context, response interface{}) (interfac
 	if resp.Err != nil {
 		success = false
 	}
-	return &bridgev1.UpdateResponse{
+	return &gateway.UpdateResponse{
 		Success: success,
 	}, resp.Err
 }
 
 func decodeDeleteGRPCRequest(ctx context.Context, request interface{}) (interface{}, error) {
-	req := request.(*bridgev1.DeleteRequest)
+	req := request.(*gateway.DeleteRequest)
 	if common.IsValidMongoID(req.Id) {
 		return DeleteRequest{
 			Id: bson.ObjectIdHex(req.Id),
@@ -158,7 +158,7 @@ func encodeDeleteGRPCResponse(_ context.Context, response interface{}) (interfac
 	if resp.Err != nil {
 		success = false
 	}
-	return &bridgev1.DeleteResponse{
+	return &gateway.DeleteResponse{
 		Success: success,
 	}, resp.Err
 }

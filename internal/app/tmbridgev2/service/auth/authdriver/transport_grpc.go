@@ -7,15 +7,15 @@ import (
 	appkitgrpc "github.com/sagikazarmark/appkit/transport/grpc"
 	kitxgrpc "github.com/sagikazarmark/kitx/transport/grpc"
 
-	bridgev1 "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
+	gateway "github.com/anhntbk08/gateway/.gen/api/proto/gateway/v1"
 	bridgeAuth "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/auth"
 )
 
 // MakeGRPCServer makes a set of endpoints available as a gRPC server.
-func MakeGRPCServer(endpoints Endpoints, options ...kitgrpc.ServerOption) bridgev1.AuthServiceServer {
+func MakeGRPCServer(endpoints Endpoints, options ...kitgrpc.ServerOption) gateway.AuthServiceServer {
 	errorEncoder := kitxgrpc.NewStatusErrorResponseEncoder(appkitgrpc.NewDefaultStatusConverter())
 
-	return bridgev1.AuthServiceKitServer{
+	return gateway.AuthServiceKitServer{
 		RequestTokenHandler: kitxgrpc.NewErrorEncoderHandler(kitgrpc.NewServer(
 			endpoints.RequestToken,
 			decodeRequestLoginTokenGRPCRequest,
@@ -32,7 +32,7 @@ func MakeGRPCServer(endpoints Endpoints, options ...kitgrpc.ServerOption) bridge
 }
 
 func decodeRequestLoginTokenGRPCRequest(_ context.Context, request interface{}) (interface{}, error) {
-	req := request.(*bridgev1.RequestTokenRequest)
+	req := request.(*gateway.RequestTokenRequest)
 
 	return RequestTokenRequest{
 		Request: bridgeAuth.RqTokenData{
@@ -44,13 +44,13 @@ func decodeRequestLoginTokenGRPCRequest(_ context.Context, request interface{}) 
 func encodeRequestLoginTokenGRPCResponse(_ context.Context, response interface{}) (interface{}, error) {
 	resp := response.(RequestTokenResponse)
 
-	return &bridgev1.RequestTokenResponse{
+	return &gateway.RequestTokenResponse{
 		Token: resp.Token.Token,
 	}, nil
 }
 
 func decodeLoginGRPCRequest(_ context.Context, request interface{}) (interface{}, error) {
-	req := request.(*bridgev1.AuthServiceLoginRequest)
+	req := request.(*gateway.AuthServiceLoginRequest)
 
 	return LoginRequest{
 		Request: bridgeAuth.Token{
@@ -64,7 +64,7 @@ func decodeLoginGRPCRequest(_ context.Context, request interface{}) (interface{}
 func encodeLoginGRPCResponse(_ context.Context, response interface{}) (interface{}, error) {
 	resp := response.(LoginResponse)
 
-	return &bridgev1.AuthServiceLoginResponse{
+	return &gateway.AuthServiceLoginResponse{
 		AccessToken: resp.AccessToken,
 	}, nil
 }

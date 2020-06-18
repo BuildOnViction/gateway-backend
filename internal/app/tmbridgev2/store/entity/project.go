@@ -17,11 +17,17 @@ type Security struct {
 	WhileListOrigins   []string `json:"while_list_origins" bson:"while_list_origins"`
 }
 
+type Addresses struct {
+	MintingAddress      string   `json:"minting_address" bson:"minting_address"`
+	WatchSmartContracts []string `json:"watch_smart_contracts" bson:"watch_smart_contracts"`
+}
+
 // Project
 type Project struct {
 	ID        bson.ObjectId `json:"id" bson:"_id"`
 	Name      string        `json:"name" bson:"name"`
 	Keys      Keys          `json:"keys" bson:"keys"`
+	Addresses Addresses     `json:"addresses" bson:"addresses"`
 	Security  Security      `json:"security" bson:"security"`
 	User      bson.ObjectId `json:"user_id" bson:"user_id"`
 	Status    bool          `json:"status" bson:"status"`

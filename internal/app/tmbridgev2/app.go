@@ -21,7 +21,7 @@ import (
 	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/landing/landingdriver"
 
 	// TODO find way to merge all small services part into 1 sub-service with driver, store adaptor ...
-	gatewayv1 "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
+	gateway "github.com/anhntbk08/gateway/.gen/api/proto/gateway/v1"
 	bridgeAuth "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/auth"
 	bridgeAuthDriver "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/auth/authdriver"
 
@@ -76,7 +76,7 @@ func InitializeApp(
 			kitxendpoint.Combine(endpointMiddleware...),
 		)
 
-		gatewayv1.RegisterAuthServiceServer(
+		gateway.RegisterAuthServiceServer(
 			grpcServer,
 			bridgeAuthDriver.MakeGRPCServer(
 				endpoints,
@@ -101,7 +101,7 @@ func InitializeApp(
 			kitgrpc.ServerBefore(gokitjwt.GRPCToContext()),
 		)
 
-		gatewayv1.RegisterProjectServiceServer(
+		gateway.RegisterProjectServiceServer(
 			grpcServer,
 			projectDriver.MakeGRPCServer(
 				endpoints,

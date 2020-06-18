@@ -2,7 +2,6 @@ package project
 
 import (
 	"context"
-	"fmt"
 
 	"emperror.dev/errors"
 
@@ -101,8 +100,8 @@ func (s service) Update(ctx context.Context, project entity.Project) (err error)
 	if err != nil {
 		return errors.WithStack(common.ValidationError{Violates: map[string][]string{
 			"project": {
-				"PROJECT.UPDATING.UNAUTHENTICATED",
-				"Resource unauthenticated",
+				"PROJECT.UPDATING.NOT_FOUND",
+				"Resource unauthenticated or not found",
 			},
 		}})
 	}
@@ -132,8 +131,8 @@ func (s service) Delete(ctx context.Context, id bson.ObjectId) (err error) {
 	if err != nil {
 		return errors.WithStack(common.ValidationError{Violates: map[string][]string{
 			"project": {
-				"PROJECT.DELETING.UNAUTHENTICATED",
-				"Resource unauthenticated",
+				"PROJECT.DELETING.NOT_FOUND",
+				"Resource unauthenticated or not found",
 			},
 		}})
 	}
@@ -141,7 +140,7 @@ func (s service) Delete(ctx context.Context, id bson.ObjectId) (err error) {
 	err = s.db.ProjectDao.RemoveItem(bson.M{
 		"_id": id,
 	})
-	fmt.Println("err ", err)
+
 	return err
 }
 

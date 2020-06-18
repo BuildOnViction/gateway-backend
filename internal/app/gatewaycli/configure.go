@@ -8,7 +8,7 @@ import (
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 
-	gateway "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
+	gateway "github.com/anhntbk08/gateway/.gen/api/proto/gateway/v1"
 	"github.com/anhntbk08/gateway/internal/app/gatewaycli/command"
 )
 

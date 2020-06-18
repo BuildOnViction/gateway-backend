@@ -1,7 +1,7 @@
 package gatewaycli
 
 import (
-	gateway "github.com/anhntbk08/gateway/.gen/api/proto/bridge/v1"
+	gateway "github.com/anhntbk08/gateway/.gen/api/proto/gateway/v1"
 )
 
 type context struct {
