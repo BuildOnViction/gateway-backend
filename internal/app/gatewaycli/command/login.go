@@ -44,17 +44,27 @@ func NewLoginCommand(c Context) *cobra.Command {
 
 	return cmd
 }
+func signHash(data []byte) []byte {
+	msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(data), data)
+	return crypto.Keccak256([]byte(msg))
+}
 
 func runLogin(options loginOptions) error {
 	privateKey, _ := crypto.HexToECDSA(options.privatekey)
 	hexToken, err := hex.DecodeString(options.token)
-	signature, err := crypto.Sign(hexToken, privateKey)
+	signature, err := crypto.Sign(signHash(hexToken), privateKey)
 
 	req := &gateway.AuthServiceLoginRequest{
 		Address:   options.address,
 		Token:     options.token,
 		Signature: hex.EncodeToString(signature),
 	}
+
+	fmt.Println(
+		options.address,
+		options.token,
+		hex.EncodeToString(signature),
+	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()

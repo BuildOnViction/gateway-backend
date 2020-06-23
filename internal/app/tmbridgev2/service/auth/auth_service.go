@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -52,12 +53,17 @@ func IsValidAddress(v string) bool {
 	return re.MatchString(v)
 }
 
+func signHash(data []byte) []byte {
+	msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(data), data)
+	return crypto.Keccak256([]byte(msg))
+}
+
 func IsValidateSignature(address, token, signature string) (bool, error) {
 	byteToken, err := hex.DecodeString(token)
 	byteSign, err := hex.DecodeString(signature)
 
 	pubkey, err := crypto.Ecrecover(
-		byteToken,
+		signHash(byteToken),
 		byteSign,
 	)
 
