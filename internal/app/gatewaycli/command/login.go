@@ -51,7 +51,7 @@ func signHash(data []byte) []byte {
 
 func runLogin(options loginOptions) error {
 	privateKey, _ := crypto.HexToECDSA(options.privatekey)
-	hexToken, err := hex.DecodeString(options.token)
+	hexToken := []byte(options.token)
 	signature, err := crypto.Sign(signHash(hexToken), privateKey)
 
 	signature[64] += 27
