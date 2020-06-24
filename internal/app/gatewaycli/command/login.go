@@ -7,8 +7,8 @@ import (
 	"time"
 
 	gateway "github.com/anhntbk08/gateway/.gen/api/proto/gateway/v1"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/spf13/cobra"
+	"github.com/tomochain/tomochain/crypto"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/status"
 )
@@ -53,6 +53,8 @@ func runLogin(options loginOptions) error {
 	privateKey, _ := crypto.HexToECDSA(options.privatekey)
 	hexToken, err := hex.DecodeString(options.token)
 	signature, err := crypto.Sign(signHash(hexToken), privateKey)
+
+	signature[64] += 27
 
 	req := &gateway.AuthServiceLoginRequest{
 		Address:   options.address,

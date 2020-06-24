@@ -13,6 +13,8 @@ import (
 	. "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store"
 	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
 	. "github.com/anhntbk08/gateway/internal/common"
+	"github.com/tomochain/tomochain/common"
+	"github.com/tomochain/tomochain/common/hexutil"
 	"github.com/tomochain/tomochain/crypto"
 	"golang.org/x/crypto/sha3"
 	// . "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
@@ -58,10 +60,27 @@ func signHash(data []byte) []byte {
 	return crypto.Keccak256([]byte(msg))
 }
 
+func verifySig(from, sigHex, msg string) (bool, error) {
+	byteMsg, err := hex.DecodeString(msg)
+	fromAddr := common.HexToAddress(from)
+	sig := hexutil.MustDecode(sigHex)
+	if sig[64] != 27 && sig[64] != 28 {
+		return false, errors.New("Wrong format signature")
+	}
+	sig[64] -= 27
+	pubKey, err := crypto.SigToPub(signHash(byteMsg), sig)
+	if err != nil {
+		return false, err
+	}
+	recoveredAddr := crypto.PubkeyToAddress(*pubKey)
+	return fromAddr == recoveredAddr, nil
+}
+
 func IsValidateSignature(address, token, signature string) (bool, error) {
 	byteToken, err := hex.DecodeString(token)
 	byteSign, err := hex.DecodeString(signature)
 
+	fmt.Println("byteSign ", byteSign)
 	pubkey, err := crypto.Ecrecover(
 		signHash(byteToken),
 		byteSign,
@@ -140,7 +159,7 @@ func (s service) Login(ctx context.Context, request Token) (accessToken string, 
 		}})
 	}
 
-	if valid, err := IsValidateSignature(request.Address, request.Token, request.Signature); !valid {
+	if valid, err := verifySig(request.Address, request.Signature, request.Token); !valid {
 		return "", errors.WithStack(ValidationError{Violates: map[string][]string{
 			"signature": {
 				"AUTH.LOGIN.INVALID_SIGNATURE",
