@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package gateway.v1;
+
+option go_package = "gateway";
+
+message Address {
+	string id = 1;
+	string project_id = 2;
+    string coin_type = 3;
+    string address = 4;
+    string deposit_address = 5;
+	int64 account_index = 6;
+}
+
+message IssueAddressRequest {
+    string project_id = 1;
+    string coin_type = 2;
+    string address = 3;
+}
+
+message IssueAddressResponse {
+    string coin_type = 1;
+    string address = 2;
+    string deposit_address = 3;
+	int64 account_index = 4;
+}
+
+message ListAddressRequest {
+    string project_id = 1;
+}
+
+message ListAddressResponse {
+	repeated Address addresses = 1;
+}
+
+service AddressService {
+  rpc Issue(IssueAddressRequest) returns (IssueAddressResponse) {};
+  
+  rpc List(ListAddressRequest) returns (ListAddressResponse) {};
+
+}

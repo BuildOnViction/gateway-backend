@@ -10,9 +10,10 @@ require (
 	emperror.dev/handler/logur v0.4.0
 	github.com/AppsFlyer/go-sundheit v0.2.0
 	github.com/ThreeDotsLabs/watermill v1.1.1
+	github.com/bitherhq/go-bither v1.7.1
 	github.com/cloudflare/tableflip v1.2.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/ethereum/go-ethereum v1.9.14
+	github.com/ethereum/go-ethereum v1.9.15 // indirect
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-bdd/gobdd v1.1.0
 	github.com/go-kit/kit v0.10.0
