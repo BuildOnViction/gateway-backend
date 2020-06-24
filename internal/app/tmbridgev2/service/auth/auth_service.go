@@ -12,7 +12,7 @@ import (
 	. "github.com/anhntbk08/gateway/internal/app/tmbridgev2/jwt"
 	. "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store"
 	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
-	. "github.com/anhntbk08/gateway/internal/common"
+	gatewayCommon "github.com/anhntbk08/gateway/internal/common"
 	"github.com/tomochain/tomochain/common"
 	"github.com/tomochain/tomochain/common/hexutil"
 	"github.com/tomochain/tomochain/crypto"
@@ -63,7 +63,11 @@ func signHash(data []byte) []byte {
 func verifySig(from, sigHex, msg string) (bool, error) {
 	byteMsg := []byte(msg)
 	fromAddr := common.HexToAddress(from)
-	sig := hexutil.MustDecode(sigHex)
+	sig, err := hexutil.Decode(sigHex)
+	if err != nil {
+		return false, errors.New("malform signature - should got 0x prefix")
+	}
+
 	if sig[64] != 27 && sig[64] != 28 {
 		return false, errors.New("Wrong format signature")
 	}
@@ -78,7 +82,7 @@ func verifySig(from, sigHex, msg string) (bool, error) {
 
 func (s service) RequestToken(ctx context.Context, request RqTokenData) (token Token, err error) {
 	if !IsValidAddress(request.Address) {
-		return Token{}, errors.WithStack(ValidationError{Violates: map[string][]string{
+		return Token{}, errors.WithStack(gatewayCommon.ValidationError{Violates: map[string][]string{
 			"address": {
 				"AUTH.INVALID_ADDRESS",
 				"Invalid address",
@@ -117,7 +121,7 @@ func (s service) RequestToken(ctx context.Context, request RqTokenData) (token T
 
 func (s service) Login(ctx context.Context, request Token) (accessToken string, err error) {
 	if !IsValidAddress(request.Address) {
-		return "", errors.WithStack(ValidationError{Violates: map[string][]string{
+		return "", errors.WithStack(gatewayCommon.ValidationError{Violates: map[string][]string{
 			"address": {
 				"AUTH.REQUEST_TOKEN.INVALID_ADDRESS",
 				"Invalid address " + err.Error(),
@@ -126,7 +130,7 @@ func (s service) Login(ctx context.Context, request Token) (accessToken string, 
 	}
 
 	if _, err := s.db.SessionDao.IsValidToken(request.Address, request.Token); err != nil {
-		return "", errors.WithStack(ValidationError{Violates: map[string][]string{
+		return "", errors.WithStack(gatewayCommon.ValidationError{Violates: map[string][]string{
 			"token": {
 				"AUTH.LOGIN.INVALID_TOKEN",
 				"Invalid token " + err.Error(),
@@ -135,7 +139,7 @@ func (s service) Login(ctx context.Context, request Token) (accessToken string, 
 	}
 
 	if valid, err := verifySig(request.Address, request.Signature, request.Token); !valid {
-		return "", errors.WithStack(ValidationError{Violates: map[string][]string{
+		return "", errors.WithStack(gatewayCommon.ValidationError{Violates: map[string][]string{
 			"signature": {
 				"AUTH.LOGIN.INVALID_SIGNATURE",
 				"Invalid signature " + err.Error(),
@@ -145,6 +149,7 @@ func (s service) Login(ctx context.Context, request Token) (accessToken string, 
 	logintoken, err := GenerateToken([]byte(s.authKey), request.Address)
 
 	if err != nil {
+		fmt.Println("Err ", err)
 		return "", err
 	}
 
@@ -158,5 +163,6 @@ func (s service) Login(ctx context.Context, request Token) (accessToken string, 
 		UpdatedAt: time.Now(),
 	})
 
+	fmt.Println("Err ", err)
 	return logintoken, err
 }

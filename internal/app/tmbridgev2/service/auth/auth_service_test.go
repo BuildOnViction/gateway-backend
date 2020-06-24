@@ -27,6 +27,16 @@ func Test_verifySig(t *testing.T) {
 			want:    true,
 			wantErr: false,
 		},
+		{
+			name: "test",
+			args: args{
+				from:   "0xB4F4e2CdeB6A5F771Ca9924a7a1F38e3776b219a",
+				msg:    "ec66c51d8172db5bab2a4a7335efbf246862d6a4b541048166f6a0b83f75912a",
+				sigHex: "0xba3f4079d3831f31dd0db8bfaf02326023b7e7d27268ffaa49d09f9ad402333223b8d0a376ab082ab579972b3dd563105c50d63722a98f3bd73b5086ccdc39fe1c",
+			},
+			want:    true,
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 
 	"emperror.dev/errors"
 	authService "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/auth"
-	. "github.com/anhntbk08/gateway/internal/common"
+	common "github.com/anhntbk08/gateway/internal/common"
 	"go.opencensus.io/stats"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
@@ -25,7 +25,7 @@ var limiter = rate.NewLimiter(10, 3)
 
 func (m defaultMiddleware) RequestToken(ctx context.Context, request authService.RqTokenData) (authService.Token, error) {
 	if limiter.Allow() == false {
-		return authService.Token{}, errors.WithStack(ValidationError{Violates: map[string][]string{
+		return authService.Token{}, errors.WithStack(common.ValidationError{Violates: map[string][]string{
 			"request": {
 				"TOO_MANY_REQUESTS",
 				"Too many request",
