@@ -61,7 +61,7 @@ func signHash(data []byte) []byte {
 }
 
 func verifySig(from, sigHex, msg string) (bool, error) {
-	byteMsg, err := hex.DecodeString(msg)
+	byteMsg := []byte(msg)
 	fromAddr := common.HexToAddress(from)
 	sig := hexutil.MustDecode(sigHex)
 	if sig[64] != 27 && sig[64] != 28 {
@@ -73,32 +73,7 @@ func verifySig(from, sigHex, msg string) (bool, error) {
 		return false, err
 	}
 	recoveredAddr := crypto.PubkeyToAddress(*pubKey)
-	return fromAddr == recoveredAddr, nil
-}
-
-func IsValidateSignature(address, token, signature string) (bool, error) {
-	byteToken, err := hex.DecodeString(token)
-	byteSign, err := hex.DecodeString(signature)
-
-	fmt.Println("byteSign ", byteSign)
-	pubkey, err := crypto.Ecrecover(
-		signHash(byteToken),
-		byteSign,
-	)
-
-	if err != nil {
-		return false, err
-	}
-
-	ecdsaPubkey := crypto.ToECDSAPub(pubkey)
-	if err != nil {
-		return false, err
-	}
-
-	expectedAddress := crypto.PubkeyToAddress(
-		*ecdsaPubkey,
-	)
-	return strings.ToLower(expectedAddress.Hex()) == strings.ToLower(address), nil
+	return strings.ToLower(fromAddr.Hex()) == strings.ToLower(recoveredAddr.Hex()), nil
 }
 
 func (s service) RequestToken(ctx context.Context, request RqTokenData) (token Token, err error) {
