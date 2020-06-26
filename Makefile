@@ -235,7 +235,7 @@ proto: bin/protoc bin/protoc-gen-go bin/protoc-gen-kit buf ## Generate client an
 	mkdir -p .gen/proto
 
 	protoc -I bin/protoc-${PROTOC_VERSION} -I api/proto --go_out=plugins=grpc,import_path=$(shell go list .):.gen/api/proto --kit_out=.gen/api/proto $(shell find api/proto -name '*.proto')
-	protoc -I bin/protoc-${PROTOC_VERSION} -I api/proto --js_out=import_style=commonjs:.gen/api/proto --kit_out=.gen/api/proto $(shell find api/proto -name '*.proto')
+	# protoc -I bin/protoc-${PROTOC_VERSION} -I api/proto --js_out=import_style=commonjs:.gen/api/proto --kit_out=.gen/api/proto $(shell find api/proto -name '*.proto')
 
 release-%: TAG_PREFIX = v
 release-%:

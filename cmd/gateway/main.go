@@ -286,7 +286,7 @@ func main() {
 				appkiterrors.IsServiceError, // filter out service errors
 			)
 
-			gateway.InitializeApp(httpRouter, grpcServer, publisher, config.Database, config.JWT, logger, errorHandler)
+			gateway.InitializeApp(httpRouter, grpcServer /*publisher*/, config.Database, config.JWT, config.Keys, logger, errorHandler)
 
 			// h, err := watermill.NewRouter(logger)
 			// emperror.Panic(err)

@@ -1,4 +1,4 @@
-package gateway
+package address
 
 import (
 	"github.com/anhntbk08/gateway/internal/common"

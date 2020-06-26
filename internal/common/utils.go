@@ -1,6 +1,9 @@
 package common
 
-import "encoding/hex"
+import (
+	"encoding/hex"
+	"regexp"
+)
 
 func IsValidMongoID(id string) bool {
 	idByte, err := hex.DecodeString(id)
@@ -13,4 +16,10 @@ func IsValidMongoID(id string) bool {
 	}
 
 	return true
+}
+
+func IsAddress(address string) bool {
+	var rex = regexp.MustCompile(`^0x[a-fA-F0-9]{40}$`)
+
+	return len(rex.FindAllString(address, -1)) > 0
 }

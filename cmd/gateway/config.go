@@ -45,6 +45,8 @@ type Configuration struct {
 	Database database.Config
 
 	JWT common.JWT
+
+	Keys map[string]string
 }
 
 // Process post-processes configuration after loading it.

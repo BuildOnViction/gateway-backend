@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"emperror.dev/emperror"
-	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/tracing/opencensus"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
@@ -28,6 +27,9 @@ import (
 	project "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/project"
 	projectDriver "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/project/projectdriver"
 
+	address "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/address"
+	addressDriver "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/address/addressdriver"
+
 	store "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store"
 	"github.com/anhntbk08/gateway/internal/common"
 	"github.com/anhntbk08/gateway/internal/platform/database"
@@ -38,9 +40,10 @@ import (
 func InitializeApp(
 	httpRouter *mux.Router,
 	grpcServer *grpc.Server,
-	publisher message.Publisher,
+	// publisher message.Publisher,
 	dbConfig database.Config,
 	jwtConfig common.JWT,
+	xPubkeys map[string]string,
 	logger Logger,
 	errorHandler ErrorHandler,
 ) {
@@ -97,7 +100,7 @@ func InitializeApp(
 			kitxendpoint.Combine(endpointMiddleware...),
 		)
 
-		grpcServerOptions = append(grpcServerOptions,
+		projectServerOptions := append(grpcServerOptions,
 			kitgrpc.ServerBefore(gokitjwt.GRPCToContext()),
 		)
 
@@ -106,7 +109,34 @@ func InitializeApp(
 			projectDriver.MakeGRPCServer(
 				endpoints,
 				jwtConfig.Key,
-				kitxgrpc.ServerOptions(grpcServerOptions),
+				kitxgrpc.ServerOptions(projectServerOptions),
+			),
+		)
+	}
+
+	{
+		service := address.NewService(
+			mongoConnection,
+			address.NewIssuer(mongoConnection, xPubkeys),
+		)
+		service = addressDriver.LoggingMiddleware(logger)(service)
+		// service = addressDriver.InstrumentationMiddleware()(service)
+
+		endpoints := addressDriver.MakeEndpoints(
+			service,
+			kitxendpoint.Combine(endpointMiddleware...),
+		)
+
+		addressServerOptions := append(grpcServerOptions,
+			kitgrpc.ServerBefore(gokitjwt.GRPCToContext()),
+		)
+
+		gateway.RegisterAddressServiceServer(
+			grpcServer,
+			addressDriver.MakeGRPCServer(
+				endpoints,
+				jwtConfig.Key,
+				kitxgrpc.ServerOptions(addressServerOptions),
 			),
 		)
 	}

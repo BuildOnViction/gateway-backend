@@ -58,7 +58,7 @@ func runLogin(options loginOptions) error {
 
 	req := &gateway.AuthServiceLoginRequest{
 		Address:   options.address,
-		Token:     options.token,
+		Message:   options.token,
 		Signature: hex.EncodeToString(signature),
 	}
 

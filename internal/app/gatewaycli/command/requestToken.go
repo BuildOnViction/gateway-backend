@@ -65,7 +65,7 @@ func runRequestToken(options requestTokenOptions) error {
 		return err
 	}
 
-	fmt.Println("Issued Token for logging in .", options.address, resp.Token)
+	fmt.Println("Issued Token for logging in .", options.address, resp.Message)
 
 	return nil
 }

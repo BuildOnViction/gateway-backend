@@ -20,6 +20,7 @@ type Service interface {
 	List(ctx context.Context) (projects []entity.Project, err error)
 	Update(ctx context.Context, project entity.Project) (err error)
 	Delete(ctx context.Context, id bson.ObjectId) (err error)
+	GetOne(ctx context.Context, id bson.ObjectId) (project entity.Project, err error)
 	// Statistic(ctx context.Context, id string) (success bool, err error)
 }
 
@@ -145,6 +146,28 @@ func (s service) Delete(ctx context.Context, id bson.ObjectId) (err error) {
 	return err
 }
 
-func (s service) Statistic(ctx context.Context, id string) (success bool, err error) {
-	return false, errors.New("Not implemented yet")
+func (s service) GetOne(ctx context.Context, id bson.ObjectId) (project entity.Project, err error) {
+	user := ctx.Value("User").(string)
+	userDao, err := s.checkUserExist(user, "GETONE")
+	if err != nil {
+		return entity.Project{}, err
+	}
+
+	// check belonging
+	res := &entity.Project{}
+	err = s.db.ProjectDao.GetOne(bson.M{
+		"_id":     id,
+		"user_id": userDao.ID,
+	}, &res)
+
+	if err != nil {
+		return entity.Project{}, errors.WithStack(common.ValidationError{Violates: map[string][]string{
+			"project": {
+				"PROJECT.GETONE.NOT_FOUND",
+				"Resource unauthenticated or not found",
+			},
+		}})
+	}
+
+	return *res, err
 }

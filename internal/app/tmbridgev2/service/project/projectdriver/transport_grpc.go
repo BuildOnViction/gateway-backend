@@ -47,6 +47,12 @@ func MakeGRPCServer(endpoints Endpoints, jwtkey string, options ...kitgrpc.Serve
 			kitxgrpc.ErrorResponseEncoder(encodeDeleteGRPCResponse, errorEncoder),
 			options...,
 		), errorEncoder),
+		GetOneHandler: kitxgrpc.NewErrorEncoderHandler(kitgrpc.NewServer(
+			VerifyToken(jwtKeyFunc, jwt.SigningMethodHS256, UserClaimFactory)(endpoints.GetOne),
+			decodeGetOneGRPCRequest,
+			kitxgrpc.ErrorResponseEncoder(encodeGetOneGRPCResponse, errorEncoder),
+			options...,
+		), errorEncoder),
 	}
 }
 
@@ -62,7 +68,7 @@ func encodeCreateGRPCResponse(_ context.Context, response interface{}) (interfac
 	resp := response.(CreateResponse)
 
 	return &gateway.CreateResponse{
-		Id:   resp.Project.ID.String(),
+		Id:   resp.Project.ID.Hex(),
 		User: resp.Project.User.Hex(),
 		Keys: &gateway.Keys{
 			Id:     resp.Project.Keys.ID,
@@ -102,6 +108,8 @@ func encodeListGRPCResponse(_ context.Context, response interface{}) (interface{
 				WebHook: t.Notification.WebHook,
 				Emails:  t.Notification.Emails,
 			},
+			CreatedAt: t.CreatedAt.Unix(),
+			UpdatedAt: t.UpdatedAt.Unix(),
 		}
 	}
 
@@ -113,9 +121,9 @@ func encodeListGRPCResponse(_ context.Context, response interface{}) (interface{
 func decodeUpdateGRPCRequest(ctx context.Context, request interface{}) (interface{}, error) {
 	req := request.(*gateway.UpdateRequest)
 
-	addresses := entity.Addresses{}
+	addresses := entity.ProjectAddresses{}
 	if req.Addresses != nil {
-		addresses = entity.Addresses{
+		addresses = entity.ProjectAddresses{
 			MintingAddress:      req.Addresses.MintingAddress,
 			WatchSmartContracts: req.Addresses.WatchSmartContracts,
 		}
@@ -195,5 +203,51 @@ func encodeDeleteGRPCResponse(_ context.Context, response interface{}) (interfac
 	}
 	return &gateway.DeleteResponse{
 		Success: success,
+	}, resp.Err
+}
+
+func decodeGetOneGRPCRequest(ctx context.Context, request interface{}) (interface{}, error) {
+	req := request.(*gateway.GetOneRequest)
+	if common.IsValidMongoID(req.Id) {
+		return GetOneRequest{
+			Id: bson.ObjectIdHex(req.Id),
+		}, nil
+	} else {
+		return GetOneRequest{}, errors.WithStack(common.ValidationError{Violates: map[string][]string{
+			"project": {
+				"PROJECT.GETONE.MALFORMED_PROJECT_ID",
+				"Malformed project id",
+			},
+		}})
+	}
+}
+
+func encodeGetOneGRPCResponse(_ context.Context, response interface{}) (interface{}, error) {
+	resp := response.(GetOneResponse)
+
+	return &gateway.GetOneResponse{
+		Project: &gateway.Project{
+			Id:   resp.Project.ID.Hex(),
+			Name: resp.Project.Name,
+			User: resp.Project.User.Hex(),
+			Keys: &gateway.Keys{
+				Id:     resp.Project.Keys.ID,
+				Secret: resp.Project.Keys.Secret,
+			},
+			Addresses: &gateway.Addresses{
+				MintingAddress:      resp.Project.Addresses.MintingAddress,
+				WatchSmartContracts: resp.Project.Addresses.WatchSmartContracts,
+			},
+			Security: &gateway.Security{
+				WhiteListDomains: resp.Project.Security.WhileListDomains,
+				WhiteListIps:     resp.Project.Security.WhileListIps,
+			},
+			Notification: &gateway.Notification{
+				WebHook: resp.Project.Notification.WebHook,
+				Emails:  resp.Project.Notification.Emails,
+			},
+			CreatedAt: resp.Project.CreatedAt.Unix(),
+			UpdatedAt: resp.Project.UpdatedAt.Unix(),
+		},
 	}, resp.Err
 }

@@ -17,7 +17,7 @@ type Security struct {
 	WhileListIps     []string `json:"while_list_ips" bson:"while_list_ips"`
 }
 
-type Addresses struct {
+type ProjectAddresses struct {
 	MintingAddress      string   `json:"minting_address" bson:"minting_address"`
 	WatchSmartContracts []string `json:"watch_smart_contracts" bson:"watch_smart_contracts"`
 }
@@ -29,16 +29,16 @@ type Notification struct {
 
 // Project
 type Project struct {
-	ID           bson.ObjectId `json:"id" bson:"_id"`
-	Name         string        `json:"name" bson:"name"`
-	Keys         Keys          `json:"keys" bson:"keys"`
-	Addresses    Addresses     `json:"addresses" bson:"addresses"`
-	Security     Security      `json:"security" bson:"security"`
-	User         bson.ObjectId `json:"user_id" bson:"user_id"`
-	Notification Notification  `json:"notification" bson:"notification"`
-	Status       bool          `json:"status" bson:"status"`
-	CreatedAt    time.Time     `json:"createdAt" bson:"createdAt"`
-	UpdatedAt    time.Time     `json:"updatedAt" bson:"updatedAt"`
+	ID           bson.ObjectId    `json:"id" bson:"_id"`
+	Name         string           `json:"name" bson:"name"`
+	Keys         Keys             `json:"keys" bson:"keys"`
+	Addresses    ProjectAddresses `json:"addresses" bson:"addresses"`
+	Security     Security         `json:"security" bson:"security"`
+	User         bson.ObjectId    `json:"user_id" bson:"user_id"`
+	Notification Notification     `json:"notification" bson:"notification"`
+	Status       bool             `json:"status" bson:"status"`
+	CreatedAt    time.Time        `json:"createdAt" bson:"createdAt"`
+	UpdatedAt    time.Time        `json:"updatedAt" bson:"updatedAt"`
 }
 
 // ProjectRecordUpdate

@@ -64,7 +64,7 @@ func (mw loggingMiddleware) RequestToken(ctx context.Context, request authServic
 		return token, err
 	}
 
-	logger.Info("Requested token", map[string]interface{}{"token": token.Token})
+	logger.Info("Requested token", map[string]interface{}{"token": token.Message})
 
 	return token, err
 }

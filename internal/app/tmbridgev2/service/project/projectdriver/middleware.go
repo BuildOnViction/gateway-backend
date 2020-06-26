@@ -31,6 +31,10 @@ func (m defaultMiddleware) Delete(ctx context.Context, projectID bson.ObjectId) 
 	return m.service.Delete(ctx, projectID)
 }
 
+func (m defaultMiddleware) GetOne(ctx context.Context, projectID bson.ObjectId) (entity.Project, error) {
+	return m.service.GetOne(ctx, projectID)
+}
+
 // LoggingMiddleware is a service level logging middleware.
 func LoggingMiddleware(logger projectService.Logger) Middleware {
 	return func(next projectService.Service) projectService.Service {
@@ -87,6 +91,10 @@ func (mw loggingMiddleware) Delete(ctx context.Context, id bson.ObjectId) error 
 	}
 
 	return err
+}
+
+func (mw loggingMiddleware) GetOne(ctx context.Context, id bson.ObjectId) (entity.Project, error) {
+	return mw.next.GetOne(ctx, id)
 }
 
 // InstrumentationMiddleware is a service level instrumentation middleware.

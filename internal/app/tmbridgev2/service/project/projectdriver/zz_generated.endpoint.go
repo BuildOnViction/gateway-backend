@@ -30,6 +30,7 @@ type serviceError interface {
 type Endpoints struct {
 	Create endpoint.Endpoint
 	Delete endpoint.Endpoint
+	GetOne endpoint.Endpoint
 	List   endpoint.Endpoint
 	Update endpoint.Endpoint
 }
@@ -42,6 +43,7 @@ func MakeEndpoints(service project.Service, middleware ...endpoint.Middleware) E
 	return Endpoints{
 		Create: kitxendpoint.OperationNameMiddleware("project.Create")(mw(MakeCreateEndpoint(service))),
 		Delete: kitxendpoint.OperationNameMiddleware("project.Delete")(mw(MakeDeleteEndpoint(service))),
+		GetOne: kitxendpoint.OperationNameMiddleware("project.GetOne")(mw(MakeGetOneEndpoint(service))),
 		List:   kitxendpoint.OperationNameMiddleware("project.List")(mw(MakeListEndpoint(service))),
 		Update: kitxendpoint.OperationNameMiddleware("project.Update")(mw(MakeUpdateEndpoint(service))),
 	}
@@ -117,6 +119,46 @@ func MakeDeleteEndpoint(service project.Service) endpoint.Endpoint {
 		}
 
 		return DeleteResponse{}, nil
+	}
+}
+
+// GetOneRequest is a request struct for GetOne endpoint.
+type GetOneRequest struct {
+	Id bson.ObjectId
+}
+
+// GetOneResponse is a response struct for GetOne endpoint.
+type GetOneResponse struct {
+	Project entity.Project
+	Err     error
+}
+
+func (r GetOneResponse) Failed() error {
+	return r.Err
+}
+
+// MakeGetOneEndpoint returns an endpoint for the matching method of the underlying service.
+func MakeGetOneEndpoint(service project.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(GetOneRequest)
+
+		project, err := service.GetOne(ctx, req.Id)
+
+		if err != nil {
+			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
+				return GetOneResponse{
+					Err:     err,
+					Project: project,
+				}, err
+			}
+
+			return GetOneResponse{
+				Err:     err,
+				Project: project,
+			}, nil
+		}
+
+		return GetOneResponse{Project: project}, nil
 	}
 }
 

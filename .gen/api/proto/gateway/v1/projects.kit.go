@@ -14,6 +14,7 @@ type ProjectServiceKitServer struct {
 	ListHandler   kitgrpc.Handler
 	UpdateHandler kitgrpc.Handler
 	DeleteHandler kitgrpc.Handler
+	GetOneHandler kitgrpc.Handler
 }
 
 func (s ProjectServiceKitServer) Create(ctx context.Context, req *CreateRequest) (*CreateResponse, error) {
@@ -47,4 +48,12 @@ func (s ProjectServiceKitServer) Delete(ctx context.Context, req *DeleteRequest)
 	}
 
 	return resp.(*DeleteResponse), nil
+}
+func (s ProjectServiceKitServer) GetOne(ctx context.Context, req *GetOneRequest) (*GetOneResponse, error) {
+	_, resp, err := s.GetOneHandler.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.(*GetOneResponse), nil
 }

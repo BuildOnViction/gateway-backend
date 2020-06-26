@@ -45,7 +45,7 @@ func encodeRequestLoginTokenGRPCResponse(_ context.Context, response interface{}
 	resp := response.(RequestTokenResponse)
 
 	return &gateway.RequestTokenResponse{
-		Token: resp.Token.Token,
+		Message: resp.Token.Message,
 	}, nil
 }
 
@@ -55,7 +55,7 @@ func decodeLoginGRPCRequest(_ context.Context, request interface{}) (interface{}
 	return LoginRequest{
 		Request: bridgeAuth.Token{
 			Address:   req.Address,
-			Token:     req.Token,
+			Message:   req.Message,
 			Signature: req.Signature,
 		},
 	}, nil

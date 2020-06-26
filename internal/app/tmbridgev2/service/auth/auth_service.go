@@ -35,7 +35,7 @@ type Token struct {
 	ID        string
 	Address   string
 	Signature string
-	Token     string
+	Message   string
 }
 
 type service struct {
@@ -115,7 +115,7 @@ func (s service) RequestToken(ctx context.Context, request RqTokenData) (token T
 
 	return Token{
 		Address: request.Address,
-		Token:   issuedToken,
+		Message: issuedToken,
 	}, err
 }
 
@@ -129,7 +129,7 @@ func (s service) Login(ctx context.Context, request Token) (accessToken string, 
 		}})
 	}
 
-	if _, err := s.db.SessionDao.IsValidToken(request.Address, request.Token); err != nil {
+	if _, err := s.db.SessionDao.IsValidToken(request.Address, request.Message); err != nil {
 		return "", errors.WithStack(gatewayCommon.ValidationError{Violates: map[string][]string{
 			"token": {
 				"AUTH.LOGIN.INVALID_TOKEN",
@@ -138,7 +138,7 @@ func (s service) Login(ctx context.Context, request Token) (accessToken string, 
 		}})
 	}
 
-	if valid, err := verifySig(request.Address, request.Signature, request.Token); !valid {
+	if valid, err := verifySig(request.Address, request.Signature, request.Message); !valid {
 		return "", errors.WithStack(gatewayCommon.ValidationError{Violates: map[string][]string{
 			"signature": {
 				"AUTH.LOGIN.INVALID_SIGNATURE",
@@ -153,7 +153,7 @@ func (s service) Login(ctx context.Context, request Token) (accessToken string, 
 		return "", err
 	}
 
-	s.db.SessionDao.Used(request.Token)
+	s.db.SessionDao.Used(request.Message)
 	err = s.db.UserDao.Upsert(&entity.User{
 		Address: request.Address,
 		Session: entity.AuthenSession{
