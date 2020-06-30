@@ -57,8 +57,8 @@ func (csi *Project) GetBSON() (interface{}, error) {
 		Addresses:    csi.Addresses,
 		Notification: csi.Notification,
 		Status:       csi.Status,
-		CreatedAt:    csi.CreatedAt,
-		UpdatedAt:    csi.UpdatedAt,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
 	}
 	return d, nil
 }

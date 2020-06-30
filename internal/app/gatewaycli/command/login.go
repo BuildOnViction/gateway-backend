@@ -59,7 +59,7 @@ func runLogin(options loginOptions) error {
 	req := &gateway.AuthServiceLoginRequest{
 		Address:   options.address,
 		Message:   options.token,
-		Signature: hex.EncodeToString(signature),
+		Signature: "0x" + hex.EncodeToString(signature),
 	}
 
 	fmt.Println(

@@ -149,7 +149,6 @@ func (s service) Login(ctx context.Context, request Token) (accessToken string, 
 	logintoken, err := GenerateToken([]byte(s.authKey), request.Address)
 
 	if err != nil {
-		fmt.Println("Err ", err)
 		return "", err
 	}
 
@@ -163,6 +162,5 @@ func (s service) Login(ctx context.Context, request Token) (accessToken string, 
 		UpdatedAt: time.Now(),
 	})
 
-	fmt.Println("Err ", err)
 	return logintoken, err
 }

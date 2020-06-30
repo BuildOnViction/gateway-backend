@@ -20,5 +20,6 @@ func AddCommands(cmd *cobra.Command, c Context) {
 		NewListProjectCommand(c),
 		NewUpdateProjectCommand(c),
 		NewDeleteProjectCommand(c),
+		NewGetOneProjectCommand(c),
 	)
 }

@@ -89,7 +89,7 @@ func encodeListGRPCResponse(_ context.Context, response interface{}) (interface{
 
 	for i, t := range resp.Projects {
 		projects[i] = &gateway.Project{
-			Id:   t.ID.String(),
+			Id:   t.ID.Hex(),
 			Name: t.Name,
 			User: t.User.Hex(),
 			Keys: &gateway.Keys{
