@@ -70,7 +70,7 @@ func runCreateProject(options creatingProjectOptions) error {
 		return err
 	}
 
-	fmt.Println("Create project result: ", resp.Keys)
+	fmt.Println("Create project result: ", resp.Id)
 	fmt.Println("Create project result: ", resp.Name)
 
 	return nil

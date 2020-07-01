@@ -6,12 +6,6 @@ import (
 	"github.com/globalsign/mgo/bson"
 )
 
-type Keys struct {
-	ID        string    `json:"id" bson:"id"`
-	Secret    string    `json:"secret" bson:"secret"`
-	ExpiredAt time.Time `json:"expiredAt" bson:"expiredAt"`
-}
-
 type Security struct {
 	WhileListDomains []string `json:"while_list_domains" bson:"while_list_domains"`
 	WhileListIps     []string `json:"while_list_ips" bson:"while_list_ips"`
@@ -31,7 +25,7 @@ type Notification struct {
 type Project struct {
 	ID           bson.ObjectId    `json:"id" bson:"_id"`
 	Name         string           `json:"name" bson:"name"`
-	Keys         Keys             `json:"keys" bson:"keys"`
+	Secret       string           `json:"secret" bson:"secret"`
 	Addresses    ProjectAddresses `json:"addresses" bson:"addresses"`
 	Security     Security         `json:"security" bson:"security"`
 	User         bson.ObjectId    `json:"user_id" bson:"user_id"`
@@ -52,7 +46,7 @@ func (csi *Project) GetBSON() (interface{}, error) {
 		ID:           bson.NewObjectId(),
 		User:         csi.User,
 		Name:         csi.Name,
-		Keys:         csi.Keys,
+		Secret:       csi.Secret,
 		Security:     csi.Security,
 		Addresses:    csi.Addresses,
 		Notification: csi.Notification,
@@ -69,7 +63,7 @@ func (csip ProjectRecordUpdate) GetBSON() (interface{}, error) {
 	set := bson.M{
 		"name":         csip.Name,
 		"user":         csip.User,
-		"keys":         csip.Keys,
+		"secret":       csip.Secret,
 		"security":     csip.Security,
 		"status":       csip.Status,
 		"addresses":    csip.Addresses,

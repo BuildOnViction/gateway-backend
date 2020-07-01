@@ -3,9 +3,11 @@ package jwt
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"time"
 
 	"emperror.dev/errors"
+	store "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store"
 	jwt "github.com/dgrijalva/jwt-go"
 	. "github.com/go-kit/kit/auth/jwt"
 	"github.com/go-kit/kit/endpoint"
@@ -137,6 +139,40 @@ func VerifyToken(keyFunc jwt.Keyfunc, method jwt.SigningMethod, newClaims Claims
 			ctx = context.WithValue(ctx, "User", claims.Address)
 			ctx = context.WithValue(ctx, JWTClaimsContextKey, token.Claims)
 
+			return next(ctx, request)
+		}
+	}
+}
+
+// TODO setup caching, limiter
+func VerifyAPIKey(mongo *store.Mongo) endpoint.Middleware {
+	return func(next endpoint.Endpoint) endpoint.Endpoint {
+		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+			val := reflect.ValueOf(request).Elem()
+			token := val.FieldByName("api_token").Interface().(string)
+
+			if len(token) == 0 {
+				return nil, errors.WithStack(APITokenError{Violates: map[string][]string{
+					"api_token": {
+						"API_TOKEN.MISSING",
+						ErrTokenContextMissing.Error(),
+					},
+				}})
+			}
+
+			// check if project exist
+			fmt.Println("token ", token)
+			project, err := mongo.ProjectDao.ExistToken(token)
+
+			if err != nil || project == nil {
+				return nil, errors.WithStack(APITokenError{Violates: map[string][]string{
+					"api_token": {
+						"API_TOKEN.INVALID",
+						ErrTokenContextMissing.Error(),
+					},
+				}})
+			}
+			ctx = context.WithValue(ctx, "Project_ID", project.ID)
 			return next(ctx, request)
 		}
 	}

@@ -135,7 +135,7 @@ func InitializeApp(
 			grpcServer,
 			addressDriver.MakeGRPCServer(
 				endpoints,
-				jwtConfig.Key,
+				mongoConnection,
 				kitxgrpc.ServerOptions(addressServerOptions),
 			),
 		)

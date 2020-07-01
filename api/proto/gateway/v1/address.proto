@@ -16,7 +16,7 @@ message Address {
 }
 
 message IssueRequest {
-    string project_id = 1;
+    string api_token = 1;
     string coin_type = 2;
     string address = 3;
 }

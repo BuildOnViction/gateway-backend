@@ -9,3 +9,60 @@ type issueAddressOptions struct {
 	authClient gateway.AuthServiceClient
 	projectCl  gateway.ProjectServiceClient
 }
+
+// // NewCreateprojectCommand creates a new cobra.Command for adding a new item to the list.
+// func NewCreateProjectCommand(c Context) *cobra.Command {
+// 	options := creatingProjectOptions{}
+
+// 	cmd := &cobra.Command{
+// 		Use:     "create-project",
+// 		Aliases: []string{"cp"},
+// 		Short:   "Create Project",
+// 		Args:    cobra.ExactArgs(2),
+// 		RunE: func(cmd *cobra.Command, args []string) error {
+// 			options.accessToken = args[0]
+// 			options.name = args[1]
+// 			options.authClient = c.GetAuthServiceClient()
+// 			options.projectCl = c.GetProjectServiceClient()
+// 			cmd.SilenceErrors = true
+// 			cmd.SilenceUsage = true
+
+// 			return runCreateProject(options)
+// 		},
+// 	}
+
+// 	return cmd
+// }
+
+// func runCreateProject(options creatingProjectOptions) error {
+// 	fmt.Println("options.access_token ", options.accessToken)
+// 	req := &gateway.CreateRequest{
+// 		Name: options.name,
+// 	}
+
+// 	ctx, cancel := context.WithTimeout(metadata.NewOutgoingContext(context.Background(), metadata.New(map[string]string{"authorization": "Bearer " + options.accessToken})), time.Second*10)
+// 	defer cancel()
+
+// 	resp, err := options.projectCl.Create(ctx, req)
+// 	if err != nil {
+// 		st := status.Convert(err)
+// 		for _, detail := range st.Details() {
+// 			// nolint: gocritic
+// 			switch t := detail.(type) {
+// 			case *errdetails.BadRequest:
+// 				fmt.Println("Oops! Your request was rejected by the server.")
+// 				for _, violation := range t.GetFieldViolations() {
+// 					fmt.Printf("The %q field was wrong:\n", violation.GetField())
+// 					fmt.Printf("\t%s\n", violation.GetDescription())
+// 				}
+// 			}
+// 		}
+
+// 		return err
+// 	}
+
+// 	fmt.Println("Create project result: ", resp.Keys)
+// 	fmt.Println("Create project result: ", resp.Name)
+
+// 	return nil
+// }

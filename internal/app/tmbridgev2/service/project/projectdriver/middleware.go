@@ -3,20 +3,35 @@ package projectdriver
 import (
 	"context"
 
+	"emperror.dev/errors"
 	projectService "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/project"
 	entity "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
+	"github.com/anhntbk08/gateway/internal/common"
 	"github.com/globalsign/mgo/bson"
+	validation "github.com/go-ozzo/ozzo-validation"
 )
 
 // Middleware is a service middleware.
 type Middleware func(projectService.Service) projectService.Service
 
-// defaultMiddleware helps implementing partial middleware.
+// defaultMiddleware helps implementing partial middleware, we use for validating fields
 type defaultMiddleware struct {
 	service projectService.Service
 }
 
 func (m defaultMiddleware) Create(ctx context.Context, name string) (entity.Project, error) {
+	err := validation.Validate(name,
+		validation.Required,
+		validation.Length(3, 100),
+	)
+	if err != nil {
+		return entity.Project{}, errors.WithStack(common.ValidationError{Violates: map[string][]string{
+			"name": {
+				"NAME.MALFORM_NAME",
+				err.Error(),
+			},
+		}})
+	}
 	return m.service.Create(ctx, name)
 }
 func (m defaultMiddleware) List(ctx context.Context) ([]entity.Project, error) {
@@ -57,7 +72,7 @@ func (mw loggingMiddleware) Create(ctx context.Context, name string) (entity.Pro
 		return entity.Project{}, err
 	}
 
-	logger.Info("Created project ", map[string]interface{}{"name": resp.Name, "id": resp.Keys.ID})
+	logger.Info("Created project ", map[string]interface{}{"name": resp.Name, "id": resp.ID})
 
 	return resp, err
 }

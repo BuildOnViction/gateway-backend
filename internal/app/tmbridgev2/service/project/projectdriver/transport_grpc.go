@@ -68,13 +68,10 @@ func encodeCreateGRPCResponse(_ context.Context, response interface{}) (interfac
 	resp := response.(CreateResponse)
 
 	return &gateway.CreateResponse{
-		Id:   resp.Project.ID.Hex(),
-		User: resp.Project.User.Hex(),
-		Keys: &gateway.Keys{
-			Id:     resp.Project.Keys.ID,
-			Secret: resp.Project.Keys.Secret,
-		},
-		Name: resp.Project.Name,
+		Id:     resp.Project.ID.Hex(),
+		User:   resp.Project.User.Hex(),
+		Secret: resp.Project.Secret,
+		Name:   resp.Project.Name,
 	}, nil
 }
 
@@ -89,13 +86,10 @@ func encodeListGRPCResponse(_ context.Context, response interface{}) (interface{
 
 	for i, t := range resp.Projects {
 		projects[i] = &gateway.Project{
-			Id:   t.ID.Hex(),
-			Name: t.Name,
-			User: t.User.Hex(),
-			Keys: &gateway.Keys{
-				Id:     t.Keys.ID,
-				Secret: t.Keys.Secret,
-			},
+			Id:     t.ID.Hex(),
+			Name:   t.Name,
+			User:   t.User.Hex(),
+			Secret: t.Secret,
 			Addresses: &gateway.Addresses{
 				MintingAddress:      t.Addresses.MintingAddress,
 				WatchSmartContracts: t.Addresses.WatchSmartContracts,
@@ -227,13 +221,10 @@ func encodeGetOneGRPCResponse(_ context.Context, response interface{}) (interfac
 
 	return &gateway.GetOneResponse{
 		Project: &gateway.Project{
-			Id:   resp.Project.ID.Hex(),
-			Name: resp.Project.Name,
-			User: resp.Project.User.Hex(),
-			Keys: &gateway.Keys{
-				Id:     resp.Project.Keys.ID,
-				Secret: resp.Project.Keys.Secret,
-			},
+			Id:     resp.Project.ID.Hex(),
+			Name:   resp.Project.Name,
+			User:   resp.Project.User.Hex(),
+			Secret: resp.Project.Secret,
 			Addresses: &gateway.Addresses{
 				MintingAddress:      resp.Project.Addresses.MintingAddress,
 				WatchSmartContracts: resp.Project.Addresses.WatchSmartContracts,

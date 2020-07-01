@@ -56,12 +56,9 @@ func (s service) Create(ctx context.Context, name string) (entity.Project, error
 	}
 
 	project := entity.Project{
-		Name: name,
-		Keys: entity.Keys{
-			ID:     xid.New().String(),
-			Secret: xid.New().String(),
-		},
-		User: userDao.ID,
+		Name:   name,
+		Secret: xid.New().String(),
+		User:   userDao.ID,
 	}
 
 	err = s.db.ProjectDao.Create(&project)
@@ -108,10 +105,12 @@ func (s service) Update(ctx context.Context, project entity.Project) (err error)
 	}
 
 	project.User = userDao.ID
-	project.Keys = res.Keys
+	project.Secret = res.Secret
 	err = s.db.ProjectDao.Update(bson.M{
 		"_id": project.ID,
-	}, project)
+	}, bson.M{
+		"$set": project,
+	})
 
 	return err
 }

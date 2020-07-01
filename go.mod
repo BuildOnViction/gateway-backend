@@ -18,6 +18,7 @@ require (
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-bdd/gobdd v1.1.0
 	github.com/go-kit/kit v0.10.0
+	github.com/go-ozzo/ozzo-validation/v4 v4.2.1 // indirect
 	github.com/go-sql-driver/mysql v1.4.0
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.4.1

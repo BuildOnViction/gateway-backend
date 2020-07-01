@@ -6,8 +6,9 @@ import (
 	"emperror.dev/errors"
 	gateway "github.com/anhntbk08/gateway/.gen/api/proto/gateway/v1"
 
-	// . "github.com/anhntbk08/gateway/internal/app/tmbridgev2/jwt"
+	. "github.com/anhntbk08/gateway/internal/app/tmbridgev2/jwt"
 	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/address"
+	store "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store"
 	"github.com/anhntbk08/gateway/internal/common"
 	"github.com/globalsign/mgo/bson"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
@@ -16,12 +17,12 @@ import (
 )
 
 // MakeGRPCServer makes a set of endpoints available as a gRPC server.
-func MakeGRPCServer(endpoints Endpoints, jwtkey string, options ...kitgrpc.ServerOption) gateway.AddressServiceServer {
+func MakeGRPCServer(endpoints Endpoints, mongo *store.Mongo, options ...kitgrpc.ServerOption) gateway.AddressServiceServer {
 	errorEncoder := kitxgrpc.NewStatusErrorResponseEncoder(appkitgrpc.NewDefaultStatusConverter())
 
 	return gateway.AddressServiceKitServer{
 		IssueHandler: kitxgrpc.NewErrorEncoderHandler(kitgrpc.NewServer(
-			endpoints.Issue,
+			VerifyAPIKey(mongo)(endpoints.Issue),
 			decodeIssueGRPCRequest,
 			kitxgrpc.ErrorResponseEncoder(encodeIssueGRPCResponse, errorEncoder),
 			options...,
@@ -32,12 +33,12 @@ func MakeGRPCServer(endpoints Endpoints, jwtkey string, options ...kitgrpc.Serve
 func decodeIssueGRPCRequest(ctx context.Context, request interface{}) (interface{}, error) {
 	req := request.(*gateway.IssueRequest)
 
-	if common.IsValidMongoID(req.ProjectId) {
+	if common.IsValidMongoID(req.ApiToken) {
 		return IssueRequest{
 			IssueRequest: address.IssueRequest{
 				Address:   req.Address,
 				CoinType:  req.CoinType,
-				ProjectID: bson.ObjectIdHex(req.ProjectId),
+				ProjectID: bson.ObjectIdHex(req.ApiToken),
 			},
 		}, nil
 	} else {

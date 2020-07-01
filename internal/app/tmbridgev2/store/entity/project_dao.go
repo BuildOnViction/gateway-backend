@@ -1,5 +1,7 @@
 package entity
 
+import "github.com/globalsign/mgo/bson"
+
 type ProjectDao struct {
 	*DAO
 }
@@ -16,14 +18,16 @@ func NewProjectDao(dbname string) *ProjectDao {
 	}
 }
 
-// func (dao *ProjectDao) Upsert(project *Project) error {
-// 	_, err := db.Upsert(dao.dbName, dao.collectionName, bson.M{"_id": project.ID}, &ProjectRecordUpdate{cs})
+func (dao *ProjectDao) ExistToken(apitoken string) (*Project, error) {
+	res := &Project{}
+	err := dao.GetOne(bson.M{"keys.id": apitoken}, &res)
 
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
 
 // func (dao *ProjectDao) Delete(project *Project) error {
 // 	_, err := db.RemoveItem(dao.dbName, dao.collectionName, bson.M{"_id": project.ID})
