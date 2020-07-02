@@ -21,6 +21,9 @@ import (
 
 	// TODO find way to merge all small services part into 1 sub-service with driver, store adaptor ...
 	gateway "github.com/anhntbk08/gateway/.gen/api/proto/gateway/v1"
+	bus "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bus"
+	job "github.com/anhntbk08/gateway/internal/app/tmbridgev2/job"
+
 	bridgeAuth "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/auth"
 	bridgeAuthDriver "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/auth/authdriver"
 
@@ -44,6 +47,7 @@ func InitializeApp(
 	dbConfig database.Config,
 	jwtConfig common.JWT,
 	xPubkeys map[string]string,
+	jobQueueConfig common.JobqueueConfig,
 	logger Logger,
 	errorHandler ErrorHandler,
 ) {
@@ -146,4 +150,9 @@ func InitializeApp(
 		"/httpbin",
 		httpbin.MakeHTTPHandler(logger.WithFields(map[string]interface{}{"module": "httpbin"})),
 	))
+
+	// job server run internal
+	bus, err := bus.NewBus(jobQueueConfig)
+	emperror.Panic(err)
+	emperror.Panic(job.StartServer(bus))
 }

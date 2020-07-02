@@ -8,6 +8,8 @@
 pkged.go
 /var/
 /vendor/
+gpc-test.json
+
 
 # IDE integration
 /.vscode/*

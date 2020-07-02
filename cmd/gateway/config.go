@@ -17,6 +17,7 @@ import (
 
 // configuration holds any kind of configuration that comes from the outside world and
 // is necessary for running the application.
+
 type Configuration struct {
 	// Log configuration
 	Log log.Config
@@ -47,6 +48,8 @@ type Configuration struct {
 	JWT common.JWT
 
 	Keys map[string]string
+
+	Jobqueue common.JobqueueConfig
 }
 
 // Process post-processes configuration after loading it.

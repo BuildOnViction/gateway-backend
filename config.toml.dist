@@ -6,9 +6,9 @@ level = "info"
 addr = ":10000"
 
 [opencensus.exporter]
-enabled = false
+enabled = true
 address = "127.0.0.1:55678"
-insecure = false
+insecure = true
 reconnectPeriod = "5s"
 
 [opencensus.trace]
@@ -16,11 +16,12 @@ sampling = { sampler = "always" }
 # sampling = { sampler = "probability", fraction = 0.5 }
 
 [opencensus.prometheus]
-enabled = false
+enabled = true
 
 [app]
 httpAddr = ":8000"
 grpcAddr = ":8001"
+
 storage = "inmemory"
 
 [database]
@@ -28,5 +29,21 @@ uri = "mongodb://tomobridgejob:anhlavip@localhost:27017/tomobridgejob"
 dbName = "tomobridgejob"
 
 [jwt]
-expiredTime = 1440 # in minutes
+expiredTime = 1440 # one day in minutes
 key="RTuwer@&HdfYjnP"
+
+[keys]
+BTC = "tpubD6NzVbkrYhZ4Y7xEbJcu3S9NE5xW4Ntas1NRFQ3sznUc7UsNTyPXTNWz827GK6eSaSCDeWiXvLSfthxVzEon6YneMa9MiyLgmHRset3N7WQ"
+ETH = "tpubD6NzVbkrYhZ4Y7xEbJcu3S9NE5xW4Ntas1NRFQ3sznUc7UsNTyPXTNWz827GK6eSaSCDeWiXvLSfthxVzEon6YneMa9MiyLgmHRset3N7WQ"
+USDT = "tpubD6NzVbkrYhZ4Y7xEbJcu3S9NE5xW4Ntas1NRFQ3sznUc7UsNTyPXTNWz827GK6eSaSCDeWiXvLSfthxVzEon6YneMa9MiyLgmHRset3N7WQ"
+
+
+[jobqueue]
+broker = "gcppubsub://xkld-197215/anhntjob1"
+defaultQueue= "bridgeanhnt"
+resultBackend= "mongodb://machinery_job:anhlavip@localhost:27017/machinery_job"
+resultsExpireIn= 3600000
+mongodb= "machinery_job"
+projectID= "xkld-197215"
+googleAuth= "./gpc-test.json"
+jobPrefix="job1local"

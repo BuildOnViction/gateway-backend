@@ -106,7 +106,7 @@ func (s service) Update(ctx context.Context, project entity.Project) (err error)
 
 	project.User = userDao.ID
 	project.Secret = res.Secret
-	err = s.db.ProjectDao.Update(bson.M{
+	_, err = s.db.ProjectDao.Upsert(bson.M{
 		"_id": project.ID,
 	}, bson.M{
 		"$set": project,
