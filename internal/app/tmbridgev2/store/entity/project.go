@@ -24,12 +24,12 @@ type Notification struct {
 // Project
 type Project struct {
 	ID           bson.ObjectId    `json:"id" bson:"_id"`
-	Name         string           `json:"name" bson:"name"`
-	Secret       string           `json:"secret" bson:"secret"`
-	Addresses    ProjectAddresses `json:"addresses" bson:"addresses"`
-	Security     Security         `json:"security" bson:"security"`
-	User         bson.ObjectId    `json:"user_id" bson:"user_id"`
-	Notification Notification     `json:"notification" bson:"notification"`
+	Name         string           `json:"name, omitempty" bson:"name, omitempty"`
+	Secret       string           `json:"secret, omitempty" bson:"secret, omitempty"`
+	Addresses    ProjectAddresses `json:"addresses, omitempty" bson:"addresses, omitempty"`
+	Security     Security         `json:"security, omitempty" bson:"security, omitempty"`
+	User         bson.ObjectId    `json:"user_id, omitempty" bson:"user_id, omitempty"`
+	Notification Notification     `json:"notification, omitempty" bson:"notification, omitempty"`
 	Status       bool             `json:"status" bson:"status"`
 	CreatedAt    time.Time        `json:"createdAt" bson:"createdAt"`
 	UpdatedAt    time.Time        `json:"updatedAt" bson:"updatedAt"`
