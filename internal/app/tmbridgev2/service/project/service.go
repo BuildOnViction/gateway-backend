@@ -6,6 +6,7 @@ import (
 	"emperror.dev/errors"
 
 	emperrorErr "emperror.dev/errors"
+	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/bus"
 	. "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store"
 	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
 	common "github.com/anhntbk08/gateway/internal/common"
@@ -25,12 +26,14 @@ type Service interface {
 }
 
 type service struct {
-	db *Mongo
+	db  *Mongo
+	bus *bus.Bus
 }
 
-func NewService(db *Mongo) Service {
+func NewService(db *Mongo, bus *bus.Bus) Service {
 	return &service{
-		db: db,
+		db:  db,
+		bus: bus,
 	}
 }
 
@@ -89,11 +92,11 @@ func (s service) Update(ctx context.Context, project entity.Project) (err error)
 	}
 
 	// check belonging
-	res := &entity.Project{}
+	oldProject := &entity.Project{}
 	err = s.db.ProjectDao.GetOne(bson.M{
 		"_id":  project.ID,
 		"user": userDao.ID,
-	}, &res)
+	}, &oldProject)
 
 	if err != nil {
 		return errors.WithStack(common.ValidationError{Violates: map[string][]string{
@@ -105,7 +108,7 @@ func (s service) Update(ctx context.Context, project entity.Project) (err error)
 	}
 
 	project.User = userDao.ID
-	project.Secret = res.Secret
+	project.Secret = oldProject.Secret
 	err = s.db.ProjectDao.Update(bson.M{
 		"_id": project.ID,
 	}, bson.M{
@@ -114,7 +117,7 @@ func (s service) Update(ctx context.Context, project entity.Project) (err error)
 
 	// if list watch address changes
 	// need to notify subscriber and readd
-
+	//oldProject.Addresses.WatchSmartContracts
 	return err
 }
 

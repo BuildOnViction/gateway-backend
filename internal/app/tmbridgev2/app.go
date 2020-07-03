@@ -70,6 +70,11 @@ func InitializeApp(
 		kitgrpc.ServerErrorHandler(transportErrorHandler),
 	}
 
+	// job server run internal
+	bus, err := bus.NewBus(jobQueueConfig)
+	emperror.Panic(err)
+	emperror.Panic(job.StartServer(bus))
+
 	{
 		service := bridgeAuth.NewService(
 			mongoConnection,
@@ -95,6 +100,7 @@ func InitializeApp(
 	{
 		service := project.NewService(
 			mongoConnection,
+			bus,
 		)
 		service = projectDriver.LoggingMiddleware(logger)(service)
 		service = projectDriver.InstrumentationMiddleware()(service)
@@ -151,8 +157,4 @@ func InitializeApp(
 		httpbin.MakeHTTPHandler(logger.WithFields(map[string]interface{}{"module": "httpbin"})),
 	))
 
-	// job server run internal
-	bus, err := bus.NewBus(jobQueueConfig)
-	emperror.Panic(err)
-	emperror.Panic(job.StartServer(bus))
 }

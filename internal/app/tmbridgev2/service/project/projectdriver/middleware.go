@@ -2,6 +2,7 @@ package projectdriver
 
 import (
 	"context"
+	"strings"
 
 	"emperror.dev/errors"
 	projectService "github.com/anhntbk08/gateway/internal/app/tmbridgev2/service/project"
@@ -38,7 +39,45 @@ func (m defaultMiddleware) List(ctx context.Context) ([]entity.Project, error) {
 	return m.service.List(ctx)
 }
 
+func checkDuplicatedAddresses(addresses []string) error {
+	rndmap := make(map[string]bool)
+
+	for _, address := range addresses {
+		rndmap[strings.ToLower(address)] = true
+	}
+
+	if len(rndmap) < len(addresses) {
+		return errors.New("Duplicated address")
+	}
+
+	return nil
+}
+
 func (m defaultMiddleware) Update(ctx context.Context, project entity.Project) error {
+	err := validation.ValidateStruct(&project,
+		validation.Field(&project.Name, validation.Length(3, 100)),
+	)
+
+	if err != nil {
+		return errors.WithStack(common.ValidationError{Violates: map[string][]string{
+			"project": {
+				"PROJECT.MALFORM_PROJECT",
+				err.Error(),
+			},
+		}})
+	}
+
+	err = checkDuplicatedAddresses(project.Addresses.WatchSmartContracts)
+
+	if err != nil {
+		return errors.WithStack(common.ValidationError{Violates: map[string][]string{
+			"project": {
+				"PROJECT.MALFORM_PROJECT_WATCH_SMART_CONTRACT",
+				err.Error(),
+			},
+		}})
+	}
+
 	return m.service.Update(ctx, project)
 }
 
