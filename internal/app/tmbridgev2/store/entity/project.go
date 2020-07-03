@@ -28,7 +28,7 @@ type Project struct {
 	Secret       string           `json:"secret, omitempty" bson:",omitempty"`
 	Addresses    ProjectAddresses `json:"addresses, omitempty" bson:",omitempty"`
 	Security     Security         `json:"security, omitempty" bson:",omitempty"`
-	User         bson.ObjectId    `json:"user_id, omitempty" bson:",omitempty"`
+	User         bson.ObjectId    `json:"user, omitempty" bson:",omitempty"`
 	Notification Notification     `json:"notification, omitempty" bson:",omitempty"`
 	Status       bool             `json:"status" bson:"status"`
 	CreatedAt    time.Time        `json:"createdAt" bson:"createdAt"`

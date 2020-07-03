@@ -75,7 +75,7 @@ func (s service) List(ctx context.Context) ([]entity.Project, error) {
 
 	projects := []entity.Project{}
 	err = s.db.ProjectDao.Get(bson.M{
-		"user_id": userDao.ID,
+		"user": userDao.ID,
 	}, 0, 100, &projects)
 
 	return projects, emperrorErr.WithStack(err)
@@ -91,8 +91,8 @@ func (s service) Update(ctx context.Context, project entity.Project) (err error)
 	// check belonging
 	res := &entity.Project{}
 	err = s.db.ProjectDao.GetOne(bson.M{
-		"_id":     project.ID,
-		"user_id": userDao.ID,
+		"_id":  project.ID,
+		"user": userDao.ID,
 	}, &res)
 
 	if err != nil {
@@ -112,6 +112,9 @@ func (s service) Update(ctx context.Context, project entity.Project) (err error)
 		"$set": project,
 	})
 
+	// if list watch address changes
+	// need to notify subscriber and readd
+
 	return err
 }
 
@@ -125,8 +128,8 @@ func (s service) Delete(ctx context.Context, id bson.ObjectId) (err error) {
 	// check belonging
 	res := &entity.Project{}
 	err = s.db.ProjectDao.GetOne(bson.M{
-		"_id":     id,
-		"user_id": userDao.ID,
+		"_id":  id,
+		"user": userDao.ID,
 	}, &res)
 
 	if err != nil {
@@ -155,8 +158,8 @@ func (s service) GetOne(ctx context.Context, id bson.ObjectId) (project entity.P
 	// check belonging
 	res := &entity.Project{}
 	err = s.db.ProjectDao.GetOne(bson.M{
-		"_id":     id,
-		"user_id": userDao.ID,
+		"_id":  id,
+		"user": userDao.ID,
 	}, &res)
 
 	if err != nil {
