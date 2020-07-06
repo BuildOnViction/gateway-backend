@@ -17,3 +17,19 @@ type JobqueueConfig struct {
 	GoogleAuth      string
 	JobPrefix       string
 }
+
+type ChainConfig struct {
+	RPC string
+	WS  string
+
+	SignMode            string
+	Confirmations       int64
+	StartBlock          uint64
+	BlockTime           time.Duration
+	IntervalRunningTime time.Duration
+	Unit                int64
+	NeededConfirms      int64
+	GasLimit            uint64
+	MinAcceptedValue    int64
+	MinGasPrice         uint64
+}

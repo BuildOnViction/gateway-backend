@@ -28,12 +28,3 @@ func (dao *ProjectDao) ExistToken(apitoken string) (*Project, error) {
 
 	return res, nil
 }
-
-// func (dao *ProjectDao) Delete(project *Project) error {
-// 	_, err := db.RemoveItem(dao.dbName, dao.collectionName, bson.M{"_id": project.ID})
-
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }

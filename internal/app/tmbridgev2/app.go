@@ -47,6 +47,7 @@ func InitializeApp(
 	dbConfig database.Config,
 	jwtConfig common.JWT,
 	xPubkeys map[string]string,
+	chainConfig common.ChainConfig,
 	jobQueueConfig common.JobqueueConfig,
 	logger Logger,
 	errorHandler ErrorHandler,
@@ -61,11 +62,10 @@ func InitializeApp(
 		appkitendpoint.LoggingMiddleware(logger),
 	}
 
-	mongoConnection, err := store.NewMongo(dbConfig.Uri, dbConfig.DbName)
+	mongoConnection, err := store.NewMongo(dbConfig.Uri, dbConfig.DbName, logger)
 	emperror.Panic(err)
 
 	transportErrorHandler := kitxtransport.NewErrorHandler(errorHandler)
-
 	grpcServerOptions := []kitgrpc.ServerOption{
 		kitgrpc.ServerErrorHandler(transportErrorHandler),
 	}
@@ -73,7 +73,7 @@ func InitializeApp(
 	// job server run internal
 	bus, err := bus.NewBus(jobQueueConfig)
 	emperror.Panic(err)
-	emperror.Panic(job.StartServer(bus))
+	emperror.Panic(job.StartServer(bus, mongoConnection, chainConfig))
 
 	{
 		service := bridgeAuth.NewService(

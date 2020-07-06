@@ -9,7 +9,7 @@ import (
 	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/bus"
 	. "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store"
 	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
-	common "github.com/anhntbk08/gateway/internal/common"
+	"github.com/anhntbk08/gateway/internal/common"
 	"github.com/globalsign/mgo/bson"
 	"github.com/rs/xid"
 )
@@ -115,10 +115,15 @@ func (s service) Update(ctx context.Context, project entity.Project) (err error)
 		"$set": project,
 	})
 
-	// if list watch address changes
-	// need to notify subscriber and readd
-	//oldProject.Addresses.WatchSmartContracts
-	return err
+	if err != nil {
+		return err
+	}
+
+	newAddresses := []string{}
+	removedAddresses, newAddresses := common.Difference(oldProject.Addresses.WatchSmartContracts, project.Addresses.WatchSmartContracts)
+
+	s.bus.NotifySmartContractAddressesChange(project.ID.Hex(), removedAddresses, newAddresses)
+	return nil
 }
 
 func (s service) Delete(ctx context.Context, id bson.ObjectId) (err error) {

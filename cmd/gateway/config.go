@@ -50,6 +50,8 @@ type Configuration struct {
 	Keys map[string]string
 
 	Jobqueue common.JobqueueConfig
+
+	ChainConfig common.ChainConfig
 }
 
 // Process post-processes configuration after loading it.
