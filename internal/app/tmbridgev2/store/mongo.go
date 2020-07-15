@@ -3,7 +3,6 @@ package database
 import (
 	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
 	"github.com/anhntbk08/gateway/internal/common"
-	"github.com/globalsign/mgo"
 )
 
 // Mongo database access object
@@ -18,7 +17,7 @@ type Mongo struct {
 
 // NewMongo new database instace
 func NewMongo(url string, dbname string, logger common.Logger) (*Mongo, error) {
-	mgo.SetLogger(logger)
+	// mgo.SetLogger(logger)
 	_, err := entity.InitSession(url, nil)
 	if err != nil {
 		return nil, err

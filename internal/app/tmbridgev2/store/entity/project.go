@@ -26,8 +26,8 @@ type Project struct {
 	ID           bson.ObjectId    `json:"id" bson:"_id"`
 	Name         string           `json:"name, omitempty" bson:",omitempty"`
 	Secret       string           `json:"secret, omitempty" bson:",omitempty"`
-	Addresses    ProjectAddresses `json:"addresses, omitempty" bson:",omitempty"`
-	Security     Security         `json:"security, omitempty" bson:",omitempty"`
+	Addresses    ProjectAddresses `json:"addresses" bson:"addresses"`
+	Security     Security         `json:"security" bson:"security"`
 	User         bson.ObjectId    `json:"user, omitempty" bson:",omitempty"`
 	Notification Notification     `json:"notification, omitempty" bson:",omitempty"`
 	Status       bool             `json:"status" bson:"status"`

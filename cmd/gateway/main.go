@@ -28,7 +28,9 @@ import (
 	"github.com/anhntbk08/gateway/internal/platform/appkit"
 	"github.com/anhntbk08/gateway/internal/platform/gosundheit"
 	"github.com/anhntbk08/gateway/internal/platform/log"
-	"github.com/anhntbk08/gateway/internal/platform/watermill"
+
+	// "github.com/anhntbk08/gateway/internal/platform/watermill"
+
 	"github.com/cloudflare/tableflip"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -111,13 +113,6 @@ func main() {
 	if configFileNotFound {
 		logger.Warn("configuration file not found")
 	}
-
-	// err = config.Validate()
-	// if err != nil {
-	// 	logger.Error(err.Error())
-
-	// 	os.Exit(3)
-	// }
 
 	// Configure error handler
 	errorHandler := logurhandler.New(logger)
@@ -214,13 +209,6 @@ func main() {
 		)
 	}
 
-	publisher, subscriber := watermill.NewPubSub(logger)
-	defer publisher.Close()
-	defer subscriber.Close()
-
-	publisher = watermill.PublisherCorrelationID(publisher)
-	subscriber = watermill.SubscriberCorrelationID(subscriber)
-
 	// Register stat views
 	err = view.Register(
 		// Health checks
@@ -287,14 +275,6 @@ func main() {
 			)
 
 			gateway.InitializeApp(httpRouter, grpcServer /*publisher*/, config.Database, config.JWT, config.Keys, config.ChainConfig, config.Jobqueue, logger, errorHandler)
-
-			// h, err := watermill.NewRouter(logger)
-			// emperror.Panic(err)
-
-			// err = gateway.RegisterEventHandlers(h, subscriber, logger)
-			// emperror.Panic(err)
-
-			// group.Add(func() error { return h.Run(context.Background()) }, func(e error) { _ = h.Close() })
 		}
 
 		logger.Info("listening on address", map[string]interface{}{"address": config.App.HttpAddr})

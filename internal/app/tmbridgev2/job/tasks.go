@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"strings"
 	"sync"
 
 	. "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bus"
@@ -84,6 +85,7 @@ func (js *JobServer) SyncSmartContractTransaction(projectID, address string) err
 	err := js.db.SmartContractDao.StartSync(address)
 	js.mutex.Unlock()
 
+	js.ReadSmartContractTx(projectID, address)
 	return err
 }
 
@@ -104,12 +106,14 @@ func (js *JobServer) scanLogs(address string) error {
 	var sc entity.SmartContract
 	scannedTo := int64(0)
 	err = js.db.SmartContractDao.GetOne(bson.M{
-		"address": address,
+		"address": strings.ToLower(address),
 	}, &sc)
 
 	if err == nil {
 		scannedTo = sc.ScannedIndex
 	}
+
+	fmt.Println("scannedTo ", scannedTo)
 
 	// TODO, break query to 10k block each turn
 	query := ethereum.FilterQuery{
@@ -120,7 +124,6 @@ func (js *JobServer) scanLogs(address string) error {
 	}
 
 	logs, err := client.FilterLogs(context.Background(), query)
-
 	err = js.saveLogs(logs, client, scannedTo, sc.ID)
 
 	return err
@@ -135,6 +138,7 @@ func (js *JobServer) saveLogs(logs []ethtypes.Log, client *ethclient.Client, sca
 		switch scLog.Topics[0].Hex() {
 		case executionHash.Hex():
 			transaction := entity.SmartContractTransaction{}
+			transaction.ID = bson.NewObjectId()
 			blockInfo, err := client.BlockByHash(context.Background(), scLog.BlockHash)
 
 			if err == nil {
@@ -144,23 +148,32 @@ func (js *JobServer) saveLogs(logs []ethtypes.Log, client *ethclient.Client, sca
 				transaction.CumulativeGasUsed = blockInfo.GasUsed()
 			}
 
-			transaction.From = scLog.Topics[1].Hex()
-			transaction.To = scLog.Topics[2].Hex()
+			transaction.From = common.HexToAddress(scLog.Topics[1].Hex()).String()
+			transaction.To = common.HexToAddress(scLog.Topics[2].Hex()).String()
+
+			// if transaction.From == transaction.To {
+			// 	continue
+			// }
+
 			transaction.BlockHash = scLog.BlockHash.Hex()
 			transaction.BlockNumber = scLog.BlockNumber
 			transaction.SmartContract = scID
 			transaction.Hash = scLog.TxHash.Hex()
 			transaction.TxIndex = scLog.TxIndex
-			transaction.Value = new(big.Int).SetBytes(scLog.Data)
-
+			transaction.Value = new(big.Int).SetBytes(scLog.Data).String()
 			transactions = append(transactions, transaction)
+
+			if scannedTo < int64(transaction.BlockNumber) {
+				scannedTo = int64(transaction.BlockNumber)
+			}
 		}
 	}
 
 	err := js.db.SmartContractDao.StopSync(scID, scannedTo)
 
-	log.ERROR.Println("Finalizing sync for ", scID, scannedTo, " got err ", err)
+	log.INFO.Println("Finalizing sync for ", scID, scannedTo, " got err ", err)
 
-	// go tomo.db.SmartContractTxDao.SaveNewTxs(transactions, tomo.CoinType)
+	go js.db.SmartContractTxDao.InsertBulk(transactions)
+
 	return nil
 }

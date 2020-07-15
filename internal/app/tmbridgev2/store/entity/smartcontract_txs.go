@@ -10,22 +10,22 @@ import (
 // SmartContractTransaction
 type SmartContractTransaction struct {
 	ID                bson.ObjectId `json:"id" bson:"_id"`
-	SmartContract     bson.ObjectId `json:"smartcontract, omitempty" bson:",omitempty"`
+	SmartContract     bson.ObjectId `json:"smart_contract" bson:"smart_contract"`
 	Status            bool          `json:"status, omitempty" bson:",omitempty"`
 	IsPending         bool          `json:"is_pending, omitempty" bson:",omitempty"`
 	TxIndex           uint          `json:"tx_index, omitempty" bson:",omitempty"`
 	Hash              string        `json:"hash, omitempty" bson:",omitempty"`
 	BlockHash         string        `json:"block_hash, omitempty" bson:",omitempty"`
 	BlockNumber       uint64        `json:"block_number, omitempty" bson:",omitempty"`
-	CumulativeGasUsed uint64        `json:"cumulative_gas, omitempty" bson:",omitempty"`
+	CumulativeGasUsed uint64        `json:"cumulative_gas_used, omitempty" bson:",omitempty"`
 	From              string        `json:"from, omitempty" bson:",omitempty"`
 	Gas               uint64        `json:"gas, omitempty" bson:",omitempty"`
 	GasPrice          *big.Int      `json:"gas_price, omitempty" bson:",omitempty"`
 	Input             []byte        `json:"input, omitempty" bson:",omitempty"`
 	Nonce             uint64        `json:"nonce, omitempty" bson:",omitempty"`
-	Timestamp         time.Time     `json:"timestamp" bson:"createdAt"`
+	Timestamp         time.Time     `json:"timestamp" bson:"timestamp"`
 	To                string        `json:"to, omitempty" bson:",omitempty"`
-	Value             *big.Int      `json:"value, omitempty" bson:",omitempty"`
+	Value             string        `json:"value, omitempty" bson:",omitempty"`
 	CreatedAt         time.Time     `json:"createdAt" bson:"createdAt"`
 	UpdatedAt         time.Time     `json:"updatedAt" bson:"updatedAt"`
 }

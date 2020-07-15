@@ -47,3 +47,15 @@ mongodb= "machinery_job"
 projectID= "xkld-197215"
 googleAuth= "./gpc-test.json"
 jobPrefix="job1local"
+
+[chainConfig]
+RPC = "https://rpc.devnet.tomochain.com"
+WS = "wss://ws.devnet.tomochain.com"
+signMode =            "MulSig"
+confirmations =       12
+startBlock =          100
+blockTime =           2000000000
+intervalRunningTime =  2000000000
+unit=                100000000
+neededConfirms=          2
+gasLimit=           1000000

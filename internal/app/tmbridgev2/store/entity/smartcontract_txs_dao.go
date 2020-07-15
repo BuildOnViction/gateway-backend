@@ -17,7 +17,7 @@ func NewSmartContractTransactionDao(dbname string) *SmartContractTransactionDao 
 	}
 
 	i2 := mgo.Index{
-		Key:    []string{"smart_contract", "hash"},
+		Key:    []string{"smart_contract", "hash", "from", "to"},
 		Unique: true,
 	}
 
@@ -37,4 +37,15 @@ func NewSmartContractTransactionDao(dbname string) *SmartContractTransactionDao 
 			dbName:         dbName,
 		},
 	}
+}
+
+func (dao *SmartContractTransactionDao) InsertBulk(transactions []SmartContractTransaction) error {
+	var ui []interface{}
+	for _, t := range transactions {
+		ui = append(ui, t)
+	}
+
+	err := dao.Create(ui...)
+
+	return err
 }

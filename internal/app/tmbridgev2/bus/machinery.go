@@ -89,6 +89,10 @@ func (bc *Bus) CreateSyncingSmartContractTransaction(projectID string, newAddres
 				Type:  "string",
 				Value: projectID,
 			},
+			{
+				Type:  "string",
+				Value: newAddress,
+			},
 		},
 		IgnoreWhenTaskNotRegistered: true,
 	}

@@ -12,8 +12,8 @@ type SmartContract struct {
 	ID           bson.ObjectId `json:"id" bson:"_id"`
 	Address      string        `json:"address" bson:"address"`
 	Type         string        `json:"type" bson:"type"` // TRC20, TRC21, TRC721
-	IsSyncing    bool          `json:"is_syncing" bson:"is_syncing"`
-	ScannedIndex int64         `json:"scanned_index" bson:"scanned_index"`
+	IsSyncing    bool          `json:"is_syncing" bson:",omitempty"`
+	ScannedIndex int64         `json:"scanned_index" bson:",omitempty"`
 	Description  string        `json:"description, omitempty" bson:",omitempty"`
 	Project      bson.ObjectId `json:"project" bson:"project"`
 	CreatedAt    time.Time     `json:"createdAt" bson:"createdAt"`
