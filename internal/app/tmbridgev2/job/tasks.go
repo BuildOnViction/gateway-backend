@@ -50,6 +50,8 @@ func StartServer(bus *Bus, db *store.Mongo, chainConfig appCommon.ChainConfig) e
 		}
 	}()
 
+	go jobServer.WatchTx()
+
 	return err
 }
 
@@ -58,12 +60,12 @@ func (js *JobServer) UpdateSmartContractWatchList(projectID string, removedAddre
 	js.mutex.Lock()
 	defer js.mutex.Unlock()
 
-	err := js.db.SmartContractDao.BulkRemove(removedAddress)
-	if err != nil {
-		// TODO project error_log to instructment metrics
-		fmt.Println("err remove addresses ", err)
-		return err
-	}
+	// actually we don't need to delete the old address
+	// err := js.db.SmartContractDao.BulkRemove(removedAddress)
+	// if err != nil {
+	// 	fmt.Println("err remove addresses ", err)
+	// 	return err
+	// }
 
 	// create separate tasks for syncing transactions each address
 	for i := 0; i < len(newAddresses); i++ {
@@ -91,11 +93,11 @@ func (js *JobServer) SyncSmartContractTransaction(projectID, address string) err
 }
 
 func (js *JobServer) ReadSmartContractTx(projectID, address string) error {
-	err := js.scanLogs(address)
+	err := js.scanLogs(address, 0)
 	return err
 }
 
-func (js *JobServer) scanLogs(address string) error {
+func (js *JobServer) scanLogs(address string, toBlock int64) error {
 	client, err := ethclient.Dial(js.chainConfig.RPC)
 
 	if err != nil {
@@ -104,7 +106,7 @@ func (js *JobServer) scanLogs(address string) error {
 	}
 
 	// check current scanned to block's logs
-	var sc entity.SmartContract
+	sc := entity.SmartContract{}
 	scannedTo := int64(0)
 	err = js.db.SmartContractDao.GetOne(bson.M{
 		"address": strings.ToLower(address),
@@ -114,14 +116,24 @@ func (js *JobServer) scanLogs(address string) error {
 		scannedTo = sc.ScannedIndex
 	}
 
-	fmt.Println("scannedTo ", scannedTo)
-
 	// TODO, break query to 10k block each turn
-	query := ethereum.FilterQuery{
-		FromBlock: big.NewInt(int64(scannedTo)),
-		Addresses: []common.Address{
-			common.HexToAddress(address),
-		},
+	var query ethereum.FilterQuery
+
+	if toBlock > scannedTo {
+		query = ethereum.FilterQuery{
+			FromBlock: big.NewInt(int64(scannedTo)),
+			ToBlock:   big.NewInt(toBlock),
+			Addresses: []common.Address{
+				common.HexToAddress(address),
+			},
+		}
+	} else {
+		query = ethereum.FilterQuery{
+			FromBlock: big.NewInt(int64(scannedTo)),
+			Addresses: []common.Address{
+				common.HexToAddress(address),
+			},
+		}
 	}
 
 	logs, err := client.FilterLogs(context.Background(), query)
@@ -167,7 +179,7 @@ func (js *JobServer) saveLogs(logs []ethtypes.Log, client *ethclient.Client, sca
 
 	err := js.db.SmartContractDao.StopSync(scID, scannedTo)
 
-	log.INFO.Println("Finalizing sync for ", scID, scannedTo, " got err ", err)
+	log.INFO.Println("Finish syncing  ", scID, scannedTo, " --  ", err)
 
 	go js.db.SmartContractTxDao.InsertBulk(transactions)
 
@@ -183,17 +195,20 @@ func (js *JobServer) WatchTx() error {
 		}
 		currentBlock := js.db.ScannedIndexDao.GetCurrentBlock("TOMO")
 
+		fmt.Println("currentBlock ", currentBlock)
 		if currentBlock == 0 {
 			currentBlock = js.chainConfig.StartBlock
 		}
 
 		block, err := ethclient.BlockByNumber(context.Background(), big.NewInt(int64(currentBlock)))
+
 		if err == nil {
 			js.findSmartContractTransactions(ethclient, block, currentBlock)
 		} else {
 			time.Sleep(js.chainConfig.IntervalRunningTime)
 			continue
 		}
+
 		js.db.ScannedIndexDao.SetCurrentBlock("TOMO", currentBlock+1)
 		time.Sleep(js.chainConfig.IntervalRunningTime)
 	}
@@ -211,7 +226,7 @@ func (js *JobServer) findSmartContractTransactions(ethclient *ethclient.Client, 
 		sc := js.db.SmartContractDao.GetByAddress(tx.To().Hex())
 		if sc != nil {
 			scannedSc[tx.To().Hex()] = true
-			go js.scanLogs(sc.Address)
+			go js.scanLogs(sc.Address, int64(currentBlock))
 		}
 	}
 

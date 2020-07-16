@@ -74,13 +74,13 @@ func (dao *ScannedIndexDao) GetCurrentBlock(cointype string) uint64 {
 }
 
 func (dao *ScannedIndexDao) SetCurrentBlock(cointype string, block uint64) error {
+	index := &ScannedIndex{
+		ScannedIndex: block,
+		Type:         strings.ToUpper(cointype),
+	}
 	_, err := dao.Upsert(bson.M{
 		"type": strings.ToUpper(cointype),
-	}, &ScannedIndexRecordUpdate{
-		ScannedIndex: &ScannedIndex{
-			ScannedIndex: block,
-		},
-	})
+	}, &ScannedIndexRecordUpdate{index})
 
 	return err
 }

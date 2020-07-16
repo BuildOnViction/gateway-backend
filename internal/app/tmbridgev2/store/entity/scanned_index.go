@@ -10,7 +10,7 @@ import (
 type ScannedIndex struct {
 	ID           bson.ObjectId `json:"id" bson:"_id"`
 	Type         string        `json:"type" bson:"type"`
-	ScannedIndex uint64        `json:"scanned_index" bson:",omitempty"`
+	ScannedIndex uint64        `json:"scanned_index" bson:"scanned_index"`
 	Description  string        `json:"description, omitempty" bson:",omitempty"`
 	CreatedAt    time.Time     `json:"createdAt" bson:"createdAt"`
 	UpdatedAt    time.Time     `json:"updatedAt" bson:"updatedAt"`
@@ -39,7 +39,7 @@ func (csip ScannedIndexRecordUpdate) GetBSON() (interface{}, error) {
 	now := time.Now()
 	set := bson.M{
 		"type":          csip.Type,
-		"scanned_index": csip.ScannedIndex,
+		"scanned_index": csip.ScannedIndex.ScannedIndex,
 		"description":   csip.Description,
 		"updatedAt":     now,
 	}
