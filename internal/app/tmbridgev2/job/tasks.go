@@ -2,7 +2,6 @@ package job
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 	"strings"
 	"sync"
@@ -195,7 +194,7 @@ func (js *JobServer) WatchTx() error {
 		}
 		currentBlock := js.db.ScannedIndexDao.GetCurrentBlock("TOMO")
 
-		fmt.Println("currentBlock ", currentBlock)
+		log.INFO.Println("[TOMO] Watch TX of block ", currentBlock)
 		if currentBlock == 0 {
 			currentBlock = js.chainConfig.StartBlock
 		}
