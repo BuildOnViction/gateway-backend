@@ -19,8 +19,8 @@ ifeq ($(filter -v,${GOARGS}),)
 endif
 TEST_FORMAT = short-verbose
 endif
-GOARCH = amd64
-GOOS = linux
+GOARCH = $(shell go env GOARCH)
+GOOS = $(shell go env GOOS)
 
 # Project variables
 OPENAPI_DESCRIPTOR_DIR = api/openapi

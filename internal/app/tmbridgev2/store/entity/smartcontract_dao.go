@@ -75,7 +75,7 @@ func (dao *SmartContractDao) GetByAddress(address string) *SmartContract {
 }
 
 func (dao *SmartContractDao) StartSync(address string) error {
-	err := dao.Update(bson.M{
+	_, err := dao.Upsert(bson.M{
 		"address": strings.ToLower(address),
 	}, bson.M{
 		"$set": bson.M{

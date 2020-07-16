@@ -1,15 +1,11 @@
 package bus
 
 import (
-	"context"
-
-	"cloud.google.com/go/pubsub"
 	"github.com/anhntbk08/gateway/internal/common"
 	"github.com/anhntbk08/machinery/v1"
 	"github.com/anhntbk08/machinery/v1/backends/result"
 	"github.com/anhntbk08/machinery/v1/config"
 	"github.com/anhntbk08/machinery/v1/tasks"
-	"google.golang.org/api/option"
 )
 
 type Bus struct {
@@ -17,22 +13,10 @@ type Bus struct {
 }
 
 func NewBus(conf common.JobqueueConfig) (*Bus, error) {
-	pubsubClient, err := pubsub.NewClient(
-		context.Background(),
-		conf.ProjectID,
-		option.WithServiceAccountFile(conf.GoogleAuth),
-	)
-	if err != nil {
-		return nil, err
-	}
-
 	cnf := &config.Config{
 		Broker:        conf.Broker,
 		DefaultQueue:  conf.DefaultQueue,
 		ResultBackend: conf.ResultBackend,
-		GCPPubSub: &config.GCPPubSubConfig{
-			Client: pubsubClient,
-		},
 		MongoDB: &config.MongoDBConfig{
 			Database: conf.Mongodb,
 		},

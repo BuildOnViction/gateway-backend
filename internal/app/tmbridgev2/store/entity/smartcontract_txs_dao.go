@@ -17,7 +17,7 @@ func NewSmartContractTransactionDao(dbname string) *SmartContractTransactionDao 
 	}
 
 	i2 := mgo.Index{
-		Key:    []string{"smart_contract", "hash", "from", "to"},
+		Key:    []string{"hash", "from", "to"},
 		Unique: true,
 	}
 

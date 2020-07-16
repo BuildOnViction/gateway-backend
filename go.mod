@@ -3,7 +3,6 @@ module github.com/anhntbk08/gateway
 go 1.14
 
 require (
-	cloud.google.com/go/pubsub v1.0.1
 	contrib.go.opencensus.io/exporter/ocagent v0.6.0
 	contrib.go.opencensus.io/exporter/prometheus v0.1.0
 	emperror.dev/emperror v0.32.0
@@ -12,17 +11,14 @@ require (
 	github.com/AppsFlyer/go-sundheit v0.2.0
 	github.com/ThreeDotsLabs/watermill v1.1.1
 	github.com/anhntbk08/machinery v1.7.7
-	github.com/bitherhq/go-bither v1.7.1
+	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
 	github.com/btcsuite/btcutil v1.0.2 // indirect
 	github.com/cloudflare/tableflip v1.2.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/ethereum/go-ethereum v1.9.15 // indirect
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-bdd/gobdd v1.1.0
-	github.com/go-delve/delve v1.4.1
 	github.com/go-kit/kit v0.10.0
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
-	github.com/go-ozzo/ozzo-validation/v4 v4.2.1 // indirect
 	github.com/go-sql-driver/mysql v1.4.0
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.4.1
@@ -50,12 +46,9 @@ require (
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 	golang.org/x/tools v0.0.0-20200329025819-fd4102a86c65 // indirect
-	google.golang.org/api v0.13.0
-	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/genproto v0.0.0-20200507105951-43844f6eee31
 	google.golang.org/grpc v1.29.1
 	google.golang.org/protobuf v1.22.0
-	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	logur.dev/adapter/logrus v0.5.0
 	logur.dev/integration/watermill v0.5.0
 	logur.dev/logur v0.16.2
