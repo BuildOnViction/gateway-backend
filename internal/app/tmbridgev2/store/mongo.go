@@ -13,6 +13,7 @@ type Mongo struct {
 	AddressDao         *entity.AddressDao
 	SmartContractDao   *entity.SmartContractDao
 	SmartContractTxDao *entity.SmartContractTransactionDao
+	ScannedIndexDao    *entity.ScannedIndexDao
 }
 
 // NewMongo new database instace
@@ -30,5 +31,6 @@ func NewMongo(url string, dbname string, logger common.Logger) (*Mongo, error) {
 		AddressDao:         entity.NewAddressDao(dbname),
 		SmartContractDao:   entity.NewSmartContractDao(dbname),
 		SmartContractTxDao: entity.NewSmartContractTransactionDao(dbname),
+		ScannedIndexDao:    entity.NewScannedIndexDao(dbname),
 	}, nil
 }

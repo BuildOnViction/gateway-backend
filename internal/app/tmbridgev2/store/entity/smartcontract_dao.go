@@ -60,6 +60,20 @@ func (dao *SmartContractDao) IsSyncing(address string) bool {
 	return true
 }
 
+func (dao *SmartContractDao) GetByAddress(address string) *SmartContract {
+	res := SmartContract{}
+
+	err := dao.GetOne(bson.M{
+		"address": strings.ToLower(address),
+	}, &res)
+
+	if err != nil {
+		return nil
+	}
+
+	return &res
+}
+
 func (dao *SmartContractDao) StartSync(address string) error {
 	err := dao.Update(bson.M{
 		"address": strings.ToLower(address),

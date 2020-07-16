@@ -2,16 +2,19 @@ package job
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"strings"
 	"sync"
+	"time"
 
 	. "github.com/anhntbk08/gateway/internal/app/tmbridgev2/bus"
 	store "github.com/anhntbk08/gateway/internal/app/tmbridgev2/store"
 	"github.com/anhntbk08/gateway/internal/app/tmbridgev2/store/entity"
 	appCommon "github.com/anhntbk08/gateway/internal/common"
 	"github.com/anhntbk08/machinery/v1/log"
+	"github.com/bitherhq/go-bither/core/types"
 	"github.com/globalsign/mgo/bson"
 	ethereum "github.com/tomochain/tomochain"
 	"github.com/tomochain/tomochain/common"
@@ -150,11 +153,6 @@ func (js *JobServer) saveLogs(logs []ethtypes.Log, client *ethclient.Client, sca
 
 			transaction.From = common.HexToAddress(scLog.Topics[1].Hex()).String()
 			transaction.To = common.HexToAddress(scLog.Topics[2].Hex()).String()
-
-			// if transaction.From == transaction.To {
-			// 	continue
-			// }
-
 			transaction.BlockHash = scLog.BlockHash.Hex()
 			transaction.BlockNumber = scLog.BlockNumber
 			transaction.SmartContract = scID
@@ -176,4 +174,87 @@ func (js *JobServer) saveLogs(logs []ethtypes.Log, client *ethclient.Client, sca
 	go js.db.SmartContractTxDao.InsertBulk(transactions)
 
 	return nil
+}
+
+func (js *JobServer) WatchTx() error {
+	for {
+		ethclient, err := ethclient.Dial(js.chainConfig.RPC)
+		if err != nil {
+			time.Sleep(js.chainConfig.IntervalRunningTime)
+			continue
+		}
+		currentBlock := js.db.ScannedIndexDao.GetCurrentBlock("TOMO")
+
+		if currentBlock == 0 {
+			currentBlock = js.chainConfig.StartBlock
+		}
+
+		block, err := ethclient.BlockByNumber(context.Background(), big.NewInt(int64(currentBlock)))
+		if err == nil {
+			js.findSmartContractTransactions(ethclient, block, currentBlock)
+		} else {
+			time.Sleep(js.chainConfig.IntervalRunningTime)
+			continue
+		}
+		js.db.ScannedIndexDao.SetCurrentBlock("TOMO", currentBlock+1)
+		time.Sleep(js.chainConfig.IntervalRunningTime)
+	}
+}
+
+func (js *JobServer) findSmartContractTransactions(ethclient *ethclient.Client, block *ethtypes.Block, currentBlock uint64) {
+	txs := block.Transactions()
+	receiverTxsMap := map[string][]int{}
+	receivers := []string{}
+	for index, tx := range txs {
+		if tx.To() == nil {
+			continue
+		}
+
+		receivers = append(receivers, tx.To().Hex())
+		receiverTxsMap[tx.To().Hex()] = append(
+			receiverTxsMap[tx.To().Hex()],
+			index,
+		)
+	}
+
+	shouldMintedAddresses := js.db.SmartContractDao.GetByAddress()
+
+	if len(shouldMintedAddresses) == 0 {
+		return
+	}
+
+	for i := 0; i < len(shouldMintedAddresses); i++ {
+		receiver := fmt.Sprintf("%v", shouldMintedAddresses[i]["address"])
+		for txIndex := 0; txIndex < len(receiverTxsMap[receiver]); txIndex++ {
+			// 	eth.Log("found deposit tx to", tx.To().Hex())
+			tx := txs[txIndex]
+
+			isMint := eth.DB.IsMint(
+				eth.CoinType,
+				tx.Hash().Hex(),
+			)
+			if isMint {
+				continue
+			}
+
+			transaction := &types.Transaction{
+				BlockNumber: block.Number(),
+				BlockHash:   block.Hash().Hex(),
+				Hash:        tx.Hash().Hex(),
+				CoinType:    eth.CoinType,
+				From:        tx.From().Hex(),
+				To:          tx.To().Hex(),
+				Amount:      tx.Value().String(),
+			}
+			b, _ := json.Marshal(transaction)
+			eth.DB.SaveTx(eth.CoinType, tx.To().Hex(), tx.Value().String(), transaction)
+
+			eth.GetBroadcaster().NotifyTransaction("in", "ETH", string(b), receiver)
+
+			eth.GetBroadcaster().CreateVerifyConfirmationTask(
+				string(b), receiver, big.NewInt(int64(currentBlock)),
+				int(eth.GetConfirmInteval().Seconds()),
+			)
+		}
+	}
 }
